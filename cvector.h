@@ -27,13 +27,8 @@
 #define LOG_ERROR_ON(_statement_,_condition_,_message_) do { if ((_statement_)==_condition_) fprintf(stderr,_message_); } while(0)
 #define LOG_ERROR_ON_NULL(_statement_,_message_) LOG_ERROR_ON(_statement_,NULL,_message_)
 
-#ifndef MIN(X, Y)
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#endif // !MIN
-
-#ifndef MAX(X, Y)
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
-#endif // !MAX
 
 /***********************************************cvector*************************************************************************/
 static void print_int(const void* _Element) {
@@ -286,6 +281,20 @@ static int cvector_push_back(cvector* pt, const void* _Element){
 // Utility function to swap 2 vectors
 static void cvector_swap(cvector* _Vector_1, cvector* _Vector_2){
     memswap((char*)_Vector_1, (char*)_Vector_2, sizeof(cvector));
+}
+
+static int cvector_shift_left(cvector* pt, size_t start_index, size_t positions_to_shift) {
+    size_t elementsToShift, newSize;
+    if ((start_index + positions_to_shift) >= cvector_size(pt)) {
+        return CVECTOR_ERROR_INVALID_PARAMETERS;
+    }
+
+    elementsToShift = cvector_size(pt) - MIN(cvector_size(pt), start_index + positions_to_shift);
+    newSize = start_index + elementsToShift;
+    memmove(cvector_at(pt, start_index), cvector_at(pt, start_index + positions_to_shift), elementsToShift);
+  
+    cvector_resize(pt, newSize);
+    return CVECTOR_SUCCESS;
 }
 
 static int cvector_isempty(cvector* _cvector) {
