@@ -29,16 +29,16 @@
 /**************************************************************************************************************************/
 
 // returns characters written excluding string termination character
-static int sprintFloat(char* str, float num, int32_t precision) {
-	uint32_t prec = 1;
-	for (; precision > 0; precision--) {
-		prec *= 10;
-	}
-	int32_t val_int = (int32_t)num;   // compute the integer part of the float
-	float val_float = (abs(num) - abs(val_int)) * prec;
-	int32_t val_fra = (int32_t)val_float;
-	return sprintf(str, "%ld.%ld", val_int, val_fra); //
-}
+//static int sprintFloat(char* str, float num, int32_t precision) {
+//	uint32_t prec = 1;
+//	for (; precision > 0; precision--) {
+//		prec *= 10;
+//	}
+//	int32_t val_int = (int32_t)num;   // compute the integer part of the float
+//	float val_float = (abs(num) - abs(val_int)) * prec;
+//	int32_t val_fra = (int32_t)val_float;
+//	return sprintf(str, "%ld.%ld", val_int, val_fra); //
+//}
 /**************************************************************************************************************************/
 
 // _int_num_bits must be 2^n

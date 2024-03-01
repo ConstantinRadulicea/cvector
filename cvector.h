@@ -16,7 +16,12 @@
 #include "sort.h"
 #include "base64.h"
 
-#define MB 1048576      // 1 megabyte in bytes = 2^20
+#define CVECTOR_SUCCESS 0
+#define CVECTOR_ERROR_MEMORY_ALLOCATION 1
+#define CVECTOR_ERROR_MEMORY_REALLOCATION 2
+#define CVECTOR_ERROR_INVALID_PARAMETERS 3
+
+#define CVECTOR_CAST(ptr, type) ((type)ptr)
 
 #define LOG_ERROR(_message_) fprintf(stderr,_message_);
 #define LOG_ERROR_ON(_statement_,_condition_,_message_) do { if ((_statement_)==_condition_) fprintf(stderr,_message_); } while(0)
@@ -34,6 +39,7 @@
 static void print_int(const void* _Element) {
     printf("%d", *((int*)_Element));
 }
+
 typedef struct cvector
 {
     void* data;         // pointer to the array conteining the array of elements
@@ -45,13 +51,12 @@ typedef struct cvector
 // Utility function to initialize the cvector
 static int cvector_init(cvector* _Cvector, size_t _NumberOfElementsToReserve, size_t _SizeOfElement){
     if (_SizeOfElement <= 0) {
-        return -2;
+        return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
     if (_NumberOfElementsToReserve > 0) {
         _Cvector->data = malloc(_SizeOfElement * _NumberOfElementsToReserve);
         if (!_Cvector->data && _NumberOfElementsToReserve != 0 && _SizeOfElement != 0) {
-            LOG_ERROR_ON_NULL(_Cvector->data, "Failed to allocate memory in cvector_init !\n");
-            return -1;
+            return CVECTOR_ERROR_MEMORY_ALLOCATION;
         }
     }
     else {
@@ -60,7 +65,7 @@ static int cvector_init(cvector* _Cvector, size_t _NumberOfElementsToReserve, si
     _Cvector->size = 0;
     _Cvector->capacity = _NumberOfElementsToReserve;
     _Cvector->size_type = _SizeOfElement;
-    return 0;
+    return CVECTOR_SUCCESS;
 }
 
 // Utility function get a pointer to the buffer
@@ -89,16 +94,16 @@ static int cvector_reserve(cvector* pt, size_t _NumOfElements){
     void* temp;
 
     if (pt->size_type <= 0) {
-        return -2;
+        return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
     if (pt->capacity >= _NumOfElements) {
-        return 0;
+        return CVECTOR_SUCCESS;
     }
     if (_NumOfElements <= 0) {
         pt->data = NULL;
         pt->capacity = 0;
         free(pt->data);
-        return 0;
+        return CVECTOR_SUCCESS;
     }
 
     if (pt->data == NULL) {
@@ -107,13 +112,11 @@ static int cvector_reserve(cvector* pt, size_t _NumOfElements){
 
     temp = realloc(pt->data, pt->size_type * _NumOfElements);
     if (!temp) {
-        free(pt->data);
-        LOG_ERROR_ON_NULL(temp, "Failed to allocate memory in cvector_reserve !\n");
-        return -1;
+        return CVECTOR_ERROR_MEMORY_REALLOCATION;
     }
     pt->data = temp;
     pt->capacity = _NumOfElements;
-    return 0;
+    return CVECTOR_SUCCESS;
 }
 
 // Resizes the container so that it contains ‘n’  dropping the newest elements in the cvector.
@@ -121,21 +124,23 @@ static int cvector_resize(cvector* pt, size_t _NewSize) {
     int temp;
     if (_NewSize > pt->size) {
         temp = cvector_reserve(pt, _NewSize);
-        if (temp != 0) {
+        if (temp != CVECTOR_SUCCESS) {
             return temp;
         }
     }
     pt->size = _NewSize;
-    return 0;
+    return CVECTOR_SUCCESS;
 }
 
 // Reduces the capacity of the cvector to fit its size and destroys all elements beyond the capacity.
 static int cvector_shrink_to_fit(cvector* pt){
+    void* temp;
+
     if (pt->size_type <= 0) {
-        return -2;
+        return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
     if (cvector_size(pt) == cvector_capacity(pt)) {
-        return 0;
+        return CVECTOR_SUCCESS;
     }
     if (cvector_size(pt) <= 0) {
         free(pt->data);
@@ -143,26 +148,20 @@ static int cvector_shrink_to_fit(cvector* pt){
         pt->size = 0;
     }
     else {
-        void* temp = realloc(pt->data, pt->size_type * pt->size);
+        temp = realloc(pt->data, pt->size_type * pt->size);
         if (!temp) {
-            LOG_ERROR_ON_NULL(temp, "Failed to allocate memory in cvector_shrink_to_fit!\n");
-            return -1;
+            return CVECTOR_ERROR_MEMORY_REALLOCATION;
         }
         pt->data = temp;
     }
 
     pt->capacity = pt->size;
-    return 0;
+    return CVECTOR_SUCCESS;
 }
 
 // Utility function get the element at intex x
 static void* cvector_at(cvector* pt, size_t _Index){
     return &((char*)pt->data)[_Index * pt->size_type];
-}
-
-// Utility function set the element at intex x
-static void cvector_set(cvector* pt, size_t _Index, const void* _Element){
-    memcpy(cvector_at(pt, _Index), _Element, cvector_size_type(pt));
 }
 
 // Utility function to insert a number of elements at a specific index
@@ -174,7 +173,10 @@ static int cvector_insert(cvector* pt, const void* _Elements, size_t _Pos, size_
 
     if (_Pos < old_size){
         new_size = old_size + _Count;
-        cvector_resize(pt, new_size);
+        tempResponse = cvector_resize(pt, new_size);
+        if (tempResponse != CVECTOR_SUCCESS) {
+            return tempResponse;
+        }
         pos_ptr = (char*)cvector_at(pt, _Pos);
         memmove(cvector_at(pt, _Pos + _Count), pos_ptr, (old_size - _Pos) * cvector_size_type(pt));
         memmove(pos_ptr, _Elements, _Count * cvector_size_type(pt));
@@ -182,13 +184,13 @@ static int cvector_insert(cvector* pt, const void* _Elements, size_t _Pos, size_
     else{
         new_size = _Pos + _Count;
         tempResponse = cvector_resize(pt, new_size);
-        if (tempResponse != 0) {
+        if (tempResponse != CVECTOR_SUCCESS) {
             return tempResponse;
         }
         pos_ptr = (char*)cvector_at(pt, _Pos);
         memmove(pos_ptr, _Elements, _Count * cvector_size_type(pt));
     }
-    return 0;
+    return CVECTOR_SUCCESS;
 }
 
 // Assigns a new value to the element, replacing its current contents.
@@ -196,17 +198,24 @@ static int cvector_assign(cvector* pt, const void* _Elements,size_t _Pos, size_t
     int tempResponse;
     if (_Pos + _Count > cvector_size(pt)) {
         tempResponse = cvector_resize(pt, _Pos + _Count);
-        if (tempResponse != 0) {
+        if (tempResponse != CVECTOR_SUCCESS) {
             return tempResponse;
         }
     }
     memcpy(cvector_at(pt, _Pos), _Elements, _Count * cvector_size_type(pt));
+
+    return CVECTOR_SUCCESS;
+}
+
+// Utility function set the element at index _Index
+static int cvector_set(cvector* pt, size_t _Index, const void* _Element) {
+    return cvector_assign(pt, _Element, _Index, 1);
 }
 
 // Removes from the vector single or multiple elements
-static void cvector_erase(cvector* pt, size_t _Pos, size_t _Count){
+static int cvector_erase(cvector* pt, size_t _Pos, size_t _Count){
     if (_Pos >= cvector_size(pt)){
-        return;
+        return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
     else if (_Pos + _Count >= cvector_size(pt)){
         cvector_resize(pt, _Pos);
@@ -215,6 +224,7 @@ static void cvector_erase(cvector* pt, size_t _Pos, size_t _Count){
         memmove(cvector_at(pt, _Pos), cvector_at(pt, _Pos + _Count), (cvector_size(pt) - _Pos - _Count) * cvector_size_type(pt));
         cvector_resize(pt, cvector_size(pt) - _Count);
     }
+    return CVECTOR_SUCCESS;
 }
 
 // It is used to pop all the elements from the cvector
@@ -233,10 +243,22 @@ static int cvector_full(cvector* pt) {
 }
 
 // Utility function to add multiple elements to the end of the cvector
-static void cvector_append(cvector* pt, const void* _Element, size_t _NumOfElements){
-    if (cvector_size(pt) + _NumOfElements > cvector_capacity(pt)) cvector_reserve(pt, cvector_capacity(pt) + _NumOfElements + cvector_capacity(pt) / 8 + 8);
+static int cvector_append(cvector* pt, const void* _Element, size_t _NumOfElements){
+    int tempResponse;
+    if (cvector_size(pt) + _NumOfElements > cvector_capacity(pt)) {
+        tempResponse = cvector_reserve(pt, cvector_capacity(pt) + _NumOfElements + cvector_capacity(pt) / 8 + 8);
+        if (tempResponse != CVECTOR_SUCCESS) {
+            return tempResponse;
+        }
+    }
     memcpy(cvector_at(pt, cvector_size(pt)), _Element, cvector_size_type(pt) * _NumOfElements);
-    cvector_resize(pt, cvector_size(pt) + _NumOfElements);
+
+    tempResponse = cvector_resize(pt, cvector_size(pt) + _NumOfElements);
+    if (tempResponse != CVECTOR_SUCCESS) {
+        return tempResponse;
+    }
+
+    return CVECTOR_SUCCESS;
 }
 
 // Utility function to get the first element in the cvector
@@ -257,8 +279,8 @@ static void cvector_pop_back(cvector* pt){
 }
 
 // Utility function to push back an element `x` to the cvector
-static void cvector_push_back(cvector* pt, const void* _Element){
-    cvector_append(pt, _Element, 1);
+static int cvector_push_back(cvector* pt, const void* _Element){
+    return cvector_append(pt, _Element, 1);
 }
 
 // Utility function to swap 2 vectors
@@ -292,11 +314,11 @@ static cvector cvector_clone(cvector* _Vector){
     int tempResponse;
     memset(&clone, 0, sizeof(clone));
     tempResponse = cvector_init(&clone, 0, cvector_size_type(_Vector));
-    if (tempResponse != 0) {
+    if (tempResponse != CVECTOR_SUCCESS) {
         return clone;
     }
     tempResponse = cvector_insert(&clone, cvector_data(_Vector), 0, cvector_size(_Vector));
-    if (tempResponse != 0) {
+    if (tempResponse != CVECTOR_SUCCESS) {
         return clone;
     }
     return clone;
@@ -351,8 +373,8 @@ static size_t cstack_capacity(cstack* pt) {
 }
 
 // Requests that the stack capacity be at least enough to contain n elements
-static void cstack_reserve(cstack* pt, size_t _NumOfElements) {
-    cvector_reserve((cvector*)pt, _NumOfElements);
+static int cstack_reserve(cstack* pt, size_t _NumOfElements) {
+    return cvector_reserve((cvector*)pt, _NumOfElements);
 }
 
 // Resizes the container so that it contains ‘n’  dropping the newest elements in the stack.
@@ -386,8 +408,8 @@ static void* cstack_top(cstack* pt) {
 }
 
 // Utility function to add an element `x` to the stack
-static void cstack_push(cstack* pt, const void* _Element) {
-    cvector_push_back((cvector*)pt, _Element);
+static int cstack_push(cstack* pt, const void* _Element) {
+    return cvector_push_back((cvector*)pt, _Element);
 }
 
 // Utility function to pop a top element from the stack
@@ -453,8 +475,8 @@ static char* cstring_at(cvector* pt, size_t _Index) {
 }
 
 // Utility function set the element at intex x
-static void cstring_set(cstring* pt, size_t _Index, const void* _Element) {
-    cvector_set((cvector*)pt, _Index, _Element);
+static int cstring_set(cstring* pt, size_t _Index, const void* _Element) {
+    return cvector_set((cvector*)pt, _Index, _Element);
 }
 
 // Utility function to insert a number of elements at a specific index
@@ -545,7 +567,9 @@ static cstring cstring_clone(cstring* _String) {
 static char* cstring_cstr(cstring* pt) {
     if (cstring_capacity(pt) <= cstring_size(pt)) cstring_reserve(pt, cstring_size(pt) + 1);
     //cstring_push_back(pt, "\0");
-    cstring_resize(pt, cstring_size(pt) + 1);
+    if (cstring_resize(pt, cstring_size(pt) + 1) != CVECTOR_SUCCESS) {
+        return NULL;
+    }
     memset(cstring_back(pt), 0, cstring_size_type(pt));
     cstring_resize(pt, cstring_size(pt) - 1);
     return (char*)cstring_data(pt);
@@ -554,11 +578,19 @@ static char* cstring_cstr(cstring* pt) {
 // Returns a newly constructed string object with its value initialized to a copy of a substring of this object.
 static cstring cstring_substr(cstring* pt, size_t pos, size_t len) {
     cstring temp;
-    cstring_init(&temp, 0, cstring_size_type(pt));
+    int tempResponse;
 
-    if (pos >= cstring_size(pt));
-    else{
-        cstring_assign(&temp, cstring_at(pt, pos), 0, MIN(cstring_size(pt) - pos, len));
+    if (pos >= cstring_size(pt)) {
+        return temp;
+    }
+    else {
+        memset(&temp, 0, sizeof(cstring));
+        cstring_init(&temp, 0, cstring_size_type(pt));
+
+        if (cstring_assign(&temp, cstring_at(pt, pos), 0, MIN(cstring_size(pt) - pos, len)) != CVECTOR_SUCCESS) {
+            memset(&temp, 0, sizeof(cstring));
+            return temp;
+        }
     }
     return temp;
 }
@@ -594,66 +626,50 @@ static size_t cstring_matching_chars(cstring* _Source, cvector* _String2, size_t
     return i;
 }
 
-// Compares a string with an array of substrings and returns the best substring match
-static cstring* cstring_best_match(cstring* _Source, cvector* _ArrayOfStrings, size_t _SourceOffset)
-{
-    if (_SourceOffset >= cstring_size(_Source)) return NULL;
-    size_t i;
-    cstring* match, *iter;
-    match = NULL;
-    for (i = 0; i < cvector_size(_ArrayOfStrings); i++)
-    {
-        iter = (cstring*)cvector_at(_ArrayOfStrings, i);
-        if (memcmp(cstring_data(_Source) + _SourceOffset, cstring_data(iter), cstring_size(iter)) == 0)
-        {
-            if (match == NULL) match = iter;
-            else if (cstring_size(iter) > cstring_size(match)) match = iter;
-        }
-    }
-    return match;
-}
-
-static cstring cstring_Base64encode(const void* _ToEncode, size_t _NunOfBytesToEncode)
-{
-    cstring encoded_data;
-    size_t encoded_size;
-    cstring_init(&encoded_data, Base64encode_len(_NunOfBytesToEncode), sizeof(char));
-    encoded_size = Base64encode(cstring_data(&encoded_data), _ToEncode, _NunOfBytesToEncode);
-    cstring_resize(&encoded_data, encoded_size);
-    return encoded_data;
-}
-static cstring cstring_Base64decode(const char* _ToDecode, size_t _NunOfBytesToDecode)
-{
-    cstring decoded_data;
-    size_t nprbytes, decoded_size;
-
-    nprbytes = Base64Decode_nprbytes(_ToDecode, _NunOfBytesToDecode);
-    decoded_size = Base64decode_len(nprbytes);
-    cstring_init(&decoded_data, decoded_size, sizeof(char));
-    decoded_size = Base64decode(cstring_data(&decoded_data), _ToDecode, nprbytes);
-    cstring_resize(&decoded_data, decoded_size);
-    cstring_shrink_to_fit(&decoded_data);
-    return decoded_data;
-}
-
-static void cstring_Base64encode_s(cstring* _Encoded, const void* _ToEncode, size_t _NunOfBytesToEncode)
+static int cstring_Base64encode_s(cstring* _Encoded, const void* _ToEncode, size_t _NunOfBytesToEncode)
 {
     cstring* encoded_data = _Encoded;
     size_t encoded_size = Base64encode_len(_NunOfBytesToEncode);
-    cstring_reserve(encoded_data, encoded_size / cstring_size_type(encoded_data) + ((encoded_size % cstring_size_type(encoded_data)) > 0));
+    int tempResponse;
+
+    tempResponse = cstring_reserve(encoded_data, encoded_size / cstring_size_type(encoded_data) + ((encoded_size % cstring_size_type(encoded_data)) > 0));
+    if (tempResponse != CVECTOR_SUCCESS) {
+        return tempResponse;
+    }
+    
     encoded_size = Base64encode(cstring_data(encoded_data), _ToEncode, _NunOfBytesToEncode);
-    cstring_resize(encoded_data, encoded_size / cstring_size_type(encoded_data) + ((encoded_size % cstring_size_type(encoded_data)) > 0));
+    
+    tempResponse = cstring_resize(encoded_data, encoded_size / cstring_size_type(encoded_data) + ((encoded_size % cstring_size_type(encoded_data)) > 0));
+    if (tempResponse != CVECTOR_SUCCESS) {
+        return tempResponse;
+    }
+
+    return CVECTOR_SUCCESS;
 }
-static void cstring_Base64decode_s(cstring* _Decoded, const char* _ToDecode, size_t _NunOfBytesToDecode)
+
+static int cstring_Base64decode_s(cstring* _Decoded, const char* _ToDecode, size_t _NunOfBytesToDecode)
 {
     cstring* decoded_data = _Decoded;
     size_t nprbytes, decoded_size;
+    int tempResponse;
 
     nprbytes = Base64Decode_nprbytes(_ToDecode, _NunOfBytesToDecode);
     decoded_size = Base64decode_len(nprbytes);
-    cstring_reserve(decoded_data, decoded_size / cstring_size_type(decoded_data) + ((decoded_size % cstring_size_type(decoded_data)) > 0));
+    
+    tempResponse = cstring_reserve(decoded_data, decoded_size / cstring_size_type(decoded_data) + ((decoded_size % cstring_size_type(decoded_data)) > 0));
+    if (tempResponse != CVECTOR_SUCCESS) {
+        return tempResponse;
+    }
+    
     decoded_size = Base64decode(cstring_data(decoded_data), _ToDecode, nprbytes);
-    cstring_resize(decoded_data, decoded_size / cstring_size_type(decoded_data) + ((decoded_size % cstring_size_type(decoded_data)) > 0));
+    
+    
+    tempResponse = cstring_resize(decoded_data, decoded_size / cstring_size_type(decoded_data) + ((decoded_size % cstring_size_type(decoded_data)) > 0));
+    if (tempResponse != CVECTOR_SUCCESS) {
+        return tempResponse;
+    }
+
+    return CVECTOR_SUCCESS;
 }
 
 // utility to free the memory allocated

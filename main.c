@@ -1,5 +1,7 @@
 #include "cvector.h"
 
+#define MB 1048576      // 1 megabyte in bytes = 2^20
+
 
 
 
@@ -51,17 +53,17 @@ int test_cvector()
     cvector_push_back(&str_vector, &temp_str);
 
 
-    cstring str1, * str2;
+    cstring str1, str2;
     str1 = cstring_create(str);
-    str2 = cstring_best_match(&str1, &str_vector, 5);
+    str2 = cstring_create(str3);
 
-    printf("%d\n", cstring_matching_chars(&str1, &temp_str, 0));
 
     printf("%s\n", cstring_cstr(&str1));
-    printf("%s\n", cstring_cstr(str2));
-    printf("%d\n", cstring_compare(&str1, str2));
+    printf("%s\n", cstring_cstr(&str2));
+    printf("%d\n", cstring_compare(&str1, &str2));
 
     cvector_free(&str1);
+    cvector_free(&str2);
     cvector_free_array(&str_vector);
     cvector_free(&str_vector);
 
