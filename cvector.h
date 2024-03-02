@@ -21,7 +21,7 @@
 #define CVECTOR_ERROR_MEMORY_REALLOCATION 2
 #define CVECTOR_ERROR_INVALID_PARAMETERS 3
 
-#define CVECTOR_CAST(ptr, type) ((type)ptr)
+#define CVECTOR_CAST(ptr, type) ((type)(ptr))
 
 #define LOG_ERROR(_message_) fprintf(stderr,_message_);
 #define LOG_ERROR_ON(_statement_,_condition_,_message_) do { if ((_statement_)==_condition_) fprintf(stderr,_message_); } while(0)
@@ -31,9 +31,6 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 /***********************************************cvector*************************************************************************/
-static void print_int(const void* _Element) {
-    printf("%d", *((int*)_Element));
-}
 
 typedef struct cvector
 {
@@ -208,9 +205,9 @@ static int cvector_set(cvector* pt, size_t _Index, const void* _Element) {
 }
 
 // Removes from the vector single or multiple elements
-static int cvector_erase(cvector* pt, size_t _Pos, size_t _Count){
+static void cvector_erase(cvector* pt, size_t _Pos, size_t _Count){
     if (_Pos >= cvector_size(pt)){
-        return CVECTOR_ERROR_INVALID_PARAMETERS;
+        return;
     }
     else if (_Pos + _Count >= cvector_size(pt)){
         cvector_resize(pt, _Pos);
@@ -219,7 +216,6 @@ static int cvector_erase(cvector* pt, size_t _Pos, size_t _Count){
         memmove(cvector_at(pt, _Pos), cvector_at(pt, _Pos + _Count), (cvector_size(pt) - _Pos - _Count) * cvector_size_type(pt));
         cvector_resize(pt, cvector_size(pt) - _Count);
     }
-    return CVECTOR_SUCCESS;
 }
 
 // It is used to pop all the elements from the cvector
@@ -280,21 +276,22 @@ static int cvector_push_back(cvector* pt, const void* _Element){
 
 // Utility function to swap 2 vectors
 static void cvector_swap(cvector* _Vector_1, cvector* _Vector_2){
-    memswap((char*)_Vector_1, (char*)_Vector_2, sizeof(cvector));
+    memswap((void*)_Vector_1, (void*)_Vector_2, sizeof(cvector));
 }
 
-static int cvector_shift_left(cvector* pt, size_t start_index, size_t positions_to_shift) {
+// returns total elements shifted
+static size_t cvector_shift_left(cvector* pt, size_t start_index, size_t positions_to_shift) {
     size_t elementsToShift, newSize;
-    if ((start_index + positions_to_shift) >= cvector_size(pt)) {
-        return CVECTOR_ERROR_INVALID_PARAMETERS;
+    if (start_index >= cvector_size(pt)) {
+        return 0;
     }
 
     elementsToShift = cvector_size(pt) - MIN(cvector_size(pt), start_index + positions_to_shift);
     newSize = start_index + elementsToShift;
     memmove(cvector_at(pt, start_index), cvector_at(pt, start_index + positions_to_shift), elementsToShift);
-  
+
     cvector_resize(pt, newSize);
-    return CVECTOR_SUCCESS;
+    return elementsToShift;
 }
 
 static int cvector_isempty(cvector* _cvector) {
@@ -340,6 +337,10 @@ static void cvector_print(cvector* pt, void (print_func)(const void* _element)) 
         print_func(cvector_at(pt, i));
         printf("\n");
     }
+}
+
+static void print_int(const void* _Element) {
+    printf("%d", *((int*)_Element));
 }
 static void cvector_print_int(cvector* pt) {
     cvector_print(pt, print_int);

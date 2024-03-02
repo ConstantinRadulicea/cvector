@@ -35,7 +35,6 @@ void test_base64()
 
 int test_cvector()
 {
-
     char str3[] = "Ciao mi chiamo louis! ";
     //Base64encode_left(str3, strlen(str3));
     printf("\n\n");
@@ -70,7 +69,19 @@ int test_cvector()
     return 0;
 }
 
+void test_cvector_shift_left() {
+    char str[] = "ciao sono louis";
+    cstring str1, str2;
+    str1 = cstring_create(str);
+    
+    cvector_shift_left(&str1, 0, 2);
+
+    printf("%s", cstring_cstr(&str1));
+
+    cstring_free(&str1);
+}
+
 int main() {
-    test_cvector();
+    test_cvector_shift_left();
     return 0;
 }
