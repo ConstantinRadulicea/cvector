@@ -117,8 +117,6 @@ int cvector_isvalid(cvector* _cvector);
 // return a cloned a string
 int cvector_clone(cvector* _dst_Vector, cvector* _src_Vector);
 
-void cvector_print(cvector* pt, void (print_func)(const void* _element));
-
 // free the memory of the vector
 void cvector_free(cvector* pt);
 

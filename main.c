@@ -6,6 +6,15 @@
 
 #define MB 1048576      // 1 megabyte in bytes = 2^20
 
+void cvector_print(cvector* pt, void (print_func)(const void* _element)) {
+    size_t i;
+    for (i = 0; i < cvector_size(pt); i++) {
+        printf("[%d] = ", i);
+        print_func(cvector_at(pt, i));
+        printf("\n");
+    }
+}
+
 void print_int(const void* _Element) {
     printf("%d", *((int*)_Element));
 }

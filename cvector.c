@@ -271,15 +271,6 @@ int cvector_clone(cvector* _dst_Vector, cvector* _src_Vector) {
     return CVECTOR_SUCCESS;
 }
 
-void cvector_print(cvector* pt, void (print_func)(const void* _element)) {
-    size_t i;
-    for (i = 0; i < cvector_size(pt); i++) {
-        printf("[%d] = ", i);
-        print_func(cvector_at(pt, i));
-        printf("\n");
-    }
-}
-
 void cvector_free(cvector* pt) {
     free(pt->data);
     pt->data = NULL;
