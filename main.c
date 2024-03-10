@@ -66,25 +66,22 @@ int test_cvector()
     CSTRING_DEFAULT(clone);
     cvector_init(&str_vector, 0, sizeof(cstring));
 
+    CSTRING_DEFAULT(temp_str);
     cstring_create(&temp_str, "mi");
-    cstring_clone(&clone, &temp_str);
-    cvector_push_back(&str_vector, &clone);
-    CSTRING_DEFAULT(clone);
+    cvector_push_back(&str_vector, &temp_str);
 
+    CSTRING_DEFAULT(temp_str);
     cstring_create(&temp_str, "mi ");
-    cstring_clone(&clone, &temp_str);
-    cvector_push_back(&str_vector, &clone);
-    CSTRING_DEFAULT(clone);
+    cvector_push_back(&str_vector, &temp_str);
 
+    CSTRING_DEFAULT(temp_str);
     cstring_create(&temp_str, "mi ch");
-    cstring_clone(&clone, &temp_str);
-    cvector_push_back(&str_vector, &clone);
-    CSTRING_DEFAULT(clone);
+    cvector_push_back(&str_vector, &temp_str);
 
+    CSTRING_DEFAULT(temp_str);
     cstring_create(&temp_str, "Ciao mi chiamo louis! 12");
-    cstring_clone(&clone, &temp_str);
-    cvector_push_back(&str_vector, &clone);
-    CSTRING_DEFAULT(clone);
+    cvector_push_back(&str_vector, &temp_str);
+    CSTRING_DEFAULT(temp_str);
 
     printf("%s\n", cstring_cstr(&temp_str));
 
