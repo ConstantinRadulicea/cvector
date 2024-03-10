@@ -28,6 +28,8 @@ void test_base64()
     char str3[] = "Ciao mi chiamo louis";
     int gg = 1;
     cstring temp_str, temp_str2;
+    CSTRING_DEFAULT(temp_str);
+    CSTRING_DEFAULT(temp_str2);
     cstring_init(&temp_str, 0, 1);
     cstring_init(&temp_str2, 0, 1);
 
@@ -58,31 +60,52 @@ int test_cvector()
     printf("\n\n");
     char str[] = "Ciao mi chiamo louis! ";
     cvector str_vector;
-    cstring temp_str;
+    cstring temp_str, clone;
+    CVECTOR_DEFAULT(str_vector);
+    CSTRING_DEFAULT(temp_str);
+    CSTRING_DEFAULT(clone);
     cvector_init(&str_vector, 0, sizeof(cstring));
-    cstring_create(&temp_str, "mi");
-    cvector_push_back(&str_vector, &temp_str);
-    cstring_create(&temp_str, "mi ");
-    cvector_push_back(&str_vector, &temp_str);
-    cstring_create(&temp_str, "mi ch");
-    cvector_push_back(&str_vector, &temp_str);
-    cstring_create(&temp_str, "Ciao mi chiamo louis! 12");
-    cvector_push_back(&str_vector, &temp_str);
 
+    cstring_create(&temp_str, "mi");
+    cstring_clone(&clone, &temp_str);
+    cvector_push_back(&str_vector, &clone);
+    CSTRING_DEFAULT(clone);
+
+    cstring_create(&temp_str, "mi ");
+    cstring_clone(&clone, &temp_str);
+    cvector_push_back(&str_vector, &clone);
+    CSTRING_DEFAULT(clone);
+
+    cstring_create(&temp_str, "mi ch");
+    cstring_clone(&clone, &temp_str);
+    cvector_push_back(&str_vector, &clone);
+    CSTRING_DEFAULT(clone);
+
+    cstring_create(&temp_str, "Ciao mi chiamo louis! 12");
+    cstring_clone(&clone, &temp_str);
+    cvector_push_back(&str_vector, &clone);
+    CSTRING_DEFAULT(clone);
+
+    printf("%s\n", cstring_cstr(&temp_str));
 
     cstring str1, str2;
+    CSTRING_DEFAULT(str1);
+    CSTRING_DEFAULT(str2);
     cstring_create(&str1, str);
     cstring_create(&str2, str3);
+    cstring_create(&temp_str, str3);
 
 
     printf("%s\n", cstring_cstr(&str1));
     printf("%s\n", cstring_cstr(&str2));
     printf("%d\n", cstring_compare(&str1, &str2));
+    printf("%s\n", cstring_cstr(&temp_str));
 
     cvector_free(&str1);
     cvector_free(&str2);
     cvector_free_array(&str_vector);
     cvector_free(&str_vector);
+    cstring_free(&temp_str);
 
     return 0;
 }
@@ -90,6 +113,8 @@ int test_cvector()
 void test_cvector_shift_left() {
     char str[] = "ciao sono louis";
     cstring str1, str2;
+    CSTRING_DEFAULT(str1);
+    CSTRING_DEFAULT(str2);
     cstring_create(&str1, str);
     
     cvector_shift_left(&str1, 0, 2);
@@ -103,6 +128,7 @@ void test_cvector_shift_left() {
 
 int main() {
     test_cvector_shift_left();
+    test_cvector();
     test_base64();
     return 0;
 }

@@ -9,18 +9,27 @@ int cvector_init(cvector* _Cvector, size_t _NumberOfElementsToReserve, size_t _S
     if (_SizeOfElement <= 0) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
-    if (_NumberOfElementsToReserve > 0) {
-        _Cvector->data = malloc(_SizeOfElement * _NumberOfElementsToReserve);
-        if (!_Cvector->data && _NumberOfElementsToReserve != 0 && _SizeOfElement != 0) {
-            return CVECTOR_ERROR_MEMORY_ALLOCATION;
-        }
+    if (cvector_isvalid(_Cvector) && cvector_capacity(_Cvector) > 0) {
+        _Cvector->capacity = (_Cvector->capacity * _Cvector->size_type) / _SizeOfElement;
+        _Cvector->size_type = _SizeOfElement;
+        _Cvector->size = 0;
+        return cvector_reserve(_Cvector, _NumberOfElementsToReserve);
     }
     else {
-        _Cvector->data = NULL;
+        if (_NumberOfElementsToReserve > 0) {
+            _Cvector->data = malloc(_SizeOfElement * _NumberOfElementsToReserve);
+            if (!_Cvector->data && _NumberOfElementsToReserve != 0 && _SizeOfElement != 0) {
+                return CVECTOR_ERROR_MEMORY_ALLOCATION;
+            }
+        }
+        else {
+            _Cvector->data = NULL;
+        }
+        _Cvector->size = 0;
+        _Cvector->capacity = _NumberOfElementsToReserve;
+        _Cvector->size_type = _SizeOfElement;
     }
-    _Cvector->size = 0;
-    _Cvector->capacity = _NumberOfElementsToReserve;
-    _Cvector->size_type = _SizeOfElement;
+
     return CVECTOR_SUCCESS;
 }
 
@@ -260,10 +269,12 @@ int cvector_clone(cvector* _dst_Vector, cvector* _src_Vector) {
     if (_dst_Vector == NULL || _src_Vector == NULL) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
+
     tempResponse = cvector_init(_dst_Vector, 0, cvector_size_type(_src_Vector));
     if (tempResponse != CVECTOR_SUCCESS) {
         return tempResponse;
     }
+
     tempResponse = cvector_insert(_dst_Vector, cvector_data(_src_Vector), 0, cvector_size(_src_Vector));
     if (tempResponse != CVECTOR_SUCCESS) {
         return tempResponse;

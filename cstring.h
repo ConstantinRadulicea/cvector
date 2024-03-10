@@ -3,6 +3,7 @@
 
 #include "cvector.h"
 
+#define CSTRING_DEFAULT(vec) vec.data=NULL; vec.size=0; vec.capacity=0; vec.size_type=0
 
 typedef cvector cstring;
 // if you want to use wchar or other types of chars use cstring_init() setting the parameter _SizeOfChar accordingly to your needs.

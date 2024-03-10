@@ -19,6 +19,7 @@
 #define CVECTOR_ERROR_MEMORY_REALLOCATION 2
 #define CVECTOR_ERROR_INVALID_PARAMETERS 3
 
+#define CVECTOR_DEFAULT(vec) vec.data=NULL; vec.size=0; vec.capacity=0; vec.size_type=0
 #define CVECTOR_CAST(ptr, type) ((type)(ptr))
 #define CVECTOR_CAST_PTR_TO_VALUE(ptr, type) (*((type*)(ptr)))
 
