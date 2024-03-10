@@ -11,6 +11,7 @@
 #define __CVECTOR_H__
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #define CVECTOR_SUCCESS 0
@@ -29,8 +30,7 @@
 
 /***********************************************cvector*************************************************************************/
 
-typedef struct cvector
-{
+typedef struct cvector {
     void* data;         // pointer to the array conteining the array of elements
     size_t size;        // total elements conteined
     size_t capacity;    // maximum number of elements that can be conteined before allocate more memory
@@ -118,9 +118,6 @@ int cvector_isvalid(cvector* _cvector);
 int cvector_clone(cvector* _dst_Vector, cvector* _src_Vector);
 
 void cvector_print(cvector* pt, void (print_func)(const void* _element));
-
-void print_int(const void* _Element);
-void cvector_print_int(cvector* pt);
 
 // free the memory of the vector
 void cvector_free(cvector* pt);

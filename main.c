@@ -1,9 +1,17 @@
 #include "cvector.h"
 #include "cstring.h"
+#include <stdio.h>
+
+
 
 #define MB 1048576      // 1 megabyte in bytes = 2^20
 
-
+void print_int(const void* _Element) {
+    printf("%d", *((int*)_Element));
+}
+void cvector_print_int(cvector* pt) {
+    cvector_print(pt, print_int);
+}
 
 
 void test_base64()
@@ -80,11 +88,6 @@ void test_cvector_shift_left() {
     printf("%s", cstring_cstr(&str1));
 
     cstring_free(&str1);
-}
-
-
-void EmergencyBrake() {
-
 }
 
 

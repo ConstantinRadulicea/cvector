@@ -1,6 +1,4 @@
 #include "base64.h"
-#include <stdint.h>
-
 
 const unsigned char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const unsigned char B64index[] =

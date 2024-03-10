@@ -21,10 +21,10 @@
     <ClInclude Include="base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sort.h">
+    <ClInclude Include="cstring.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cstring.h">
+    <ClInclude Include="memswap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,13 +35,13 @@
     <ClCompile Include="cvector.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cstack.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="cstring.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="base64.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="memswap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

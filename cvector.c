@@ -1,5 +1,5 @@
 #include "cvector.h"
-#include "sort.h"
+#include "memswap.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -278,13 +278,6 @@ void cvector_print(cvector* pt, void (print_func)(const void* _element)) {
         print_func(cvector_at(pt, i));
         printf("\n");
     }
-}
-
-void print_int(const void* _Element) {
-    printf("%d", *((int*)_Element));
-}
-void cvector_print_int(cvector* pt) {
-    cvector_print(pt, print_int);
 }
 
 void cvector_free(cvector* pt) {
