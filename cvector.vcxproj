@@ -128,10 +128,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="base64.h" />
+    <ClInclude Include="cstring.h" />
     <ClInclude Include="cvector.h" />
     <ClInclude Include="sort.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cstack.c" />
+    <ClCompile Include="cstring.c" />
+    <ClCompile Include="cvector.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

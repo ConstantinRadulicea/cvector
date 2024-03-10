@@ -1,4 +1,5 @@
 #include "cvector.h"
+#include "cstring.h"
 
 #define MB 1048576      // 1 megabyte in bytes = 2^20
 
@@ -25,9 +26,9 @@ void test_base64()
     //    printf("\n\n");
     //}
     printf("original:   {%s}\n", str3);
-    cstring_Base64encode_s(&temp_str, str3, strlen(str3));
+    cstring_Base64encode(&temp_str, str3, strlen(str3));
     printf("encoded:    {%s}\n", cstring_cstr(&temp_str));
-    cstring_Base64decode_s(&temp_str2, cstring_data(&temp_str), cstring_size(&temp_str));
+    cstring_Base64decode(&temp_str2, cstring_data(&temp_str), cstring_size(&temp_str));
     printf("decoded:    {%s}\n", cstring_cstr(&temp_str2));
     cvector_free(&temp_str2);
     cvector_free(&temp_str);
@@ -42,19 +43,19 @@ int test_cvector()
     cvector str_vector;
     cstring temp_str;
     cvector_init(&str_vector, 0, sizeof(cstring));
-    temp_str = cstring_create("mi");
+    cstring_create(&temp_str, "mi");
     cvector_push_back(&str_vector, &temp_str);
-    temp_str = cstring_create("mi ");
+    cstring_create(&temp_str, "mi ");
     cvector_push_back(&str_vector, &temp_str);
-    temp_str = cstring_create("mi ch");
+    cstring_create(&temp_str, "mi ch");
     cvector_push_back(&str_vector, &temp_str);
-    temp_str = cstring_create("Ciao mi chiamo louis! 12");
+    cstring_create(&temp_str, "Ciao mi chiamo louis! 12");
     cvector_push_back(&str_vector, &temp_str);
 
 
     cstring str1, str2;
-    str1 = cstring_create(str);
-    str2 = cstring_create(str3);
+    cstring_create(&str1, str);
+    cstring_create(&str2, str3);
 
 
     printf("%s\n", cstring_cstr(&str1));
@@ -72,7 +73,7 @@ int test_cvector()
 void test_cvector_shift_left() {
     char str[] = "ciao sono louis";
     cstring str1, str2;
-    str1 = cstring_create(str);
+    cstring_create(&str1, str);
     
     cvector_shift_left(&str1, 0, 2);
 
@@ -81,7 +82,16 @@ void test_cvector_shift_left() {
     cstring_free(&str1);
 }
 
+
+void EmergencyBrake() {
+
+}
+
+
+
 int main() {
     test_cvector_shift_left();
+    test_base64();
     return 0;
 }
+
