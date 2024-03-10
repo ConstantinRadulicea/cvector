@@ -19,6 +19,7 @@
 #define CVECTOR_ERROR_INVALID_PARAMETERS 3
 
 #define CVECTOR_CAST(ptr, type) ((type)(ptr))
+#define CVECTOR_CAST_PTR_TO_VALUE(ptr, type) (*((type*)(ptr)))
 
 #define LOG_ERROR(_message_) fprintf(stderr,_message_);
 #define LOG_ERROR_ON(_statement_,_condition_,_message_) do { if ((_statement_)==_condition_) fprintf(stderr,_message_); } while(0)

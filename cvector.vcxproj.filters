@@ -41,5 +41,8 @@
     <ClCompile Include="cstring.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="base64.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

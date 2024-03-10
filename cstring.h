@@ -96,7 +96,7 @@ int cstring_substr(cstring* _dst_string, cstring* _src_string, size_t pos, size_
 // Function that compare 2 strings and return: 1 (s1 > s2), 0 (s1 == s2), -1 (s1 < s2)
 int cstring_compare(cvector* _String_1, cvector* _String_2);
 
-// Searches the string pt for the first occurrence of the sequence specified by its arguments. retunr [(size_t)-1] on fail
+// Searches the string pt for the first occurrence of the sequence specified by its arguments. returns [(size_t)-1] on fail
 size_t cstring_find(cstring* pt, const char* _String, size_t pos, size_t _StringLen);
 
 // return the number of matching characters starting from the offset, stops at the first difference

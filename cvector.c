@@ -5,8 +5,6 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 
-
-
 int cvector_init(cvector* _Cvector, size_t _NumberOfElementsToReserve, size_t _SizeOfElement) {
     if (_SizeOfElement <= 0) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
