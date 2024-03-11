@@ -186,7 +186,7 @@ int cstring_Base64encode(cstring* _Encoded, const void* _ToEncode, size_t _NunOf
     if (_Encoded == NULL || _ToEncode == NULL) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
-
+    cstring_init(encoded_data, 0, sizeof(char));
     tempResponse = cstring_reserve(encoded_data, encoded_size / cstring_size_type(encoded_data) + ((encoded_size % cstring_size_type(encoded_data)) > 0));
     if (tempResponse != CVECTOR_SUCCESS) {
         return tempResponse;
@@ -214,6 +214,8 @@ int cstring_Base64decode(cstring* _Decoded, const char* _ToDecode, size_t _NunOf
 
     nprbytes = Base64Decode_nprbytes(_ToDecode, _NunOfBytesToDecode);
     decoded_size = Base64decode_len(nprbytes);
+
+    cstring_init(decoded_data, 0, sizeof(char));
 
     tempResponse = cstring_reserve(decoded_data, decoded_size / cstring_size_type(decoded_data) + ((decoded_size % cstring_size_type(decoded_data)) > 0));
     if (tempResponse != CVECTOR_SUCCESS) {

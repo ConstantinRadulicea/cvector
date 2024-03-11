@@ -116,7 +116,7 @@ void test_cvector_shift_left() {
     
     cvector_shift_left(&str1, 0, 2);
 
-    printf("%s", cstring_cstr(&str1));
+    printf("%s\n", cstring_cstr(&str1));
 
     cstring_free(&str1);
 }
