@@ -6,26 +6,26 @@
 
 
 int cvector_init(cvector* _Cvector, size_t _NumberOfElementsToReserve, size_t _SizeOfElement) {
-    if (_SizeOfElement <= 0) {
+    if (_SizeOfElement <= (size_t)0) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
-    if (cvector_isvalid(_Cvector) && cvector_capacity(_Cvector) > 0) {
+    if (cvector_isvalid(_Cvector) && cvector_capacity(_Cvector) > (size_t)0) {
         _Cvector->capacity = (_Cvector->capacity * _Cvector->size_type) / _SizeOfElement;
         _Cvector->size_type = _SizeOfElement;
-        _Cvector->size = 0;
+        _Cvector->size = (size_t)0;
         return cvector_reserve(_Cvector, _NumberOfElementsToReserve);
     }
     else {
-        if (_NumberOfElementsToReserve > 0) {
+        if (_NumberOfElementsToReserve > (size_t)0) {
             _Cvector->data = malloc(_SizeOfElement * _NumberOfElementsToReserve);
-            if (!_Cvector->data && _NumberOfElementsToReserve != 0 && _SizeOfElement != 0) {
+            if (!_Cvector->data && _NumberOfElementsToReserve != (size_t)0 && _SizeOfElement != (size_t)0) {
                 return CVECTOR_ERROR_MEMORY_ALLOCATION;
             }
         }
         else {
             _Cvector->data = NULL;
         }
-        _Cvector->size = 0;
+        _Cvector->size = (size_t)0;
         _Cvector->capacity = _NumberOfElementsToReserve;
         _Cvector->size_type = _SizeOfElement;
     }
@@ -52,15 +52,15 @@ size_t cvector_size_type(cvector* pt) {
 int cvector_reserve(cvector* pt, size_t _NumOfElements) {
     void* temp;
 
-    if (pt->size_type <= 0) {
+    if (pt->size_type <= (size_t)0) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
     if (pt->capacity >= _NumOfElements) {
         return CVECTOR_SUCCESS;
     }
-    if (_NumOfElements <= 0) {
+    if (_NumOfElements <= (size_t)0) {
         pt->data = NULL;
-        pt->capacity = 0;
+        pt->capacity = (size_t)0;
         free(pt->data);
         return CVECTOR_SUCCESS;
     }
@@ -93,16 +93,16 @@ int cvector_resize(cvector* pt, size_t _NewSize) {
 int cvector_shrink_to_fit(cvector* pt) {
     void* temp;
 
-    if (pt->size_type <= 0) {
+    if (pt->size_type <= (size_t)0) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
     if (cvector_size(pt) == cvector_capacity(pt)) {
         return CVECTOR_SUCCESS;
     }
-    if (cvector_size(pt) <= 0) {
+    if (cvector_size(pt) <= (size_t)0) {
         free(pt->data);
         pt->data = NULL;
-        pt->size = 0;
+        pt->size = (size_t)0;
     }
     else {
         temp = realloc(pt->data, pt->size_type * pt->size);
@@ -162,7 +162,7 @@ int cvector_assign(cvector* pt, const void* _Elements, size_t _Pos, size_t _Coun
 }
 
 int cvector_set(cvector* pt, size_t _Index, const void* _Element) {
-    return cvector_assign(pt, _Element, _Index, 1);
+    return cvector_assign(pt, _Element, _Index, (size_t)1);
 }
 
 void cvector_erase(cvector* pt, size_t _Pos, size_t _Count) {
@@ -179,11 +179,11 @@ void cvector_erase(cvector* pt, size_t _Pos, size_t _Count) {
 }
 
 void cvector_clear(cvector* pt) {
-    cvector_resize(pt, 0);
+    cvector_resize(pt, (size_t)0);
 }
 
 int cvector_empty(cvector* pt) {
-    return cvector_size(pt) == 0;
+    return cvector_size(pt) == (size_t)0;
 }
 
 int cvector_full(cvector* pt) {
@@ -193,7 +193,7 @@ int cvector_full(cvector* pt) {
 int cvector_append(cvector* pt, const void* _Element, size_t _NumOfElements) {
     int tempResponse;
     if (cvector_size(pt) + _NumOfElements > cvector_capacity(pt)) {
-        tempResponse = cvector_reserve(pt, cvector_capacity(pt) + _NumOfElements + cvector_capacity(pt) / 8 + 8);
+        tempResponse = cvector_reserve(pt, cvector_capacity(pt) + _NumOfElements + cvector_capacity(pt) / (size_t)8 + (size_t)8);
         if (tempResponse != CVECTOR_SUCCESS) {
             return tempResponse;
         }
@@ -209,21 +209,21 @@ int cvector_append(cvector* pt, const void* _Element, size_t _NumOfElements) {
 }
 
 void* cvector_front(cvector* pt) {
-    return cvector_at((cvector*)pt, 0);
+    return cvector_at((cvector*)pt, (size_t)0);
 }
 
 void* cvector_back(cvector* pt) {
     if (cvector_empty(pt)) return NULL;
-    return cvector_at(pt, cvector_size(pt) - 1);
+    return cvector_at(pt, cvector_size(pt) - (size_t)1);
 }
 
 void cvector_pop_back(cvector* pt) {
     if (cvector_empty(pt)) return;
-    cvector_resize(pt, cvector_size(pt) - 1);
+    cvector_resize(pt, cvector_size(pt) - (size_t)1);
 }
 
 int cvector_push_back(cvector* pt, const void* _Element) {
-    return cvector_append(pt, _Element, 1);
+    return cvector_append(pt, _Element, (size_t)1);
 }
 
 void cvector_swap(cvector* _Vector_1, cvector* _Vector_2) {
@@ -245,17 +245,17 @@ size_t cvector_shift_left(cvector* pt, size_t start_index, size_t positions_to_s
 }
 
 int cvector_isempty(cvector* _cvector) {
-    if (cvector_size(_cvector) <= 0) {
+    if (cvector_size(_cvector) <= (size_t)0) {
         return 1;
     }
     return 0;
 }
 
 int cvector_isvalid(cvector* _cvector) {
-    if (cvector_capacity(_cvector) > 0 && cvector_data(_cvector) == NULL) {
+    if (cvector_capacity(_cvector) > (size_t)0 && cvector_data(_cvector) == NULL) {
         return 0;
     }
-    if (cvector_size_type(_cvector) <= 0) {
+    if (cvector_size_type(_cvector) <= (size_t)0) {
         return 0;
     }
     if (cvector_size(_cvector) > cvector_capacity(_cvector)) {
@@ -270,12 +270,12 @@ int cvector_clone(cvector* _dst_Vector, cvector* _src_Vector) {
         return CVECTOR_ERROR_INVALID_PARAMETERS;
     }
 
-    tempResponse = cvector_init(_dst_Vector, 0, cvector_size_type(_src_Vector));
+    tempResponse = cvector_init(_dst_Vector, (size_t)0, cvector_size_type(_src_Vector));
     if (tempResponse != CVECTOR_SUCCESS) {
         return tempResponse;
     }
 
-    tempResponse = cvector_insert(_dst_Vector, cvector_data(_src_Vector), 0, cvector_size(_src_Vector));
+    tempResponse = cvector_insert(_dst_Vector, cvector_data(_src_Vector), (size_t)0, cvector_size(_src_Vector));
     if (tempResponse != CVECTOR_SUCCESS) {
         return tempResponse;
     }
@@ -285,14 +285,14 @@ int cvector_clone(cvector* _dst_Vector, cvector* _src_Vector) {
 void cvector_free(cvector* pt) {
     free(pt->data);
     pt->data = NULL;
-    pt->capacity = 0;
-    pt->size = 0;
-    pt->size_type = 0;
+    pt->capacity = (size_t)0;
+    pt->size = (size_t)0;
+    pt->size_type = (size_t)0;
 }
 
 void cvector_free_array(cvector* pt) {
     size_t i;
-    for (i = 0; i < cvector_size(pt); i++) {
+    for (i = (size_t)0; i < cvector_size(pt); i++) {
         cvector_free((cvector*)cvector_at(pt, i));
     }
 }

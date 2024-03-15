@@ -132,6 +132,7 @@
     <ClInclude Include="cstring.h" />
     <ClInclude Include="cvector.h" />
     <ClInclude Include="memswap.h" />
+    <ClInclude Include="staticbuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base64.c" />
@@ -139,6 +140,7 @@
     <ClCompile Include="cvector.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memswap.c" />
+    <ClCompile Include="staticbuffer.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
