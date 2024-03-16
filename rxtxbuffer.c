@@ -1,4 +1,5 @@
 #include "rxtxbuffer.h"
+#include <memory.h>
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -64,4 +65,10 @@ void* rxtxbuffer_tx_buf(rxtxbuffer* pt) {
 
 void* rxtxbuffer_rx_buf(rxtxbuffer* pt) {
 	return ((char*)(pt->data)) + pt->recved_size;
+}
+
+void rxtxbuffer_shift_tx_buf(rxtxbuffer* pt) {
+	memmove(rxtxbuffer_data(pt), rxtxbuffer_tx_buf(pt), rxtxbuffer_tx_remaining(pt));
+	pt->recved_size = rxtxbuffer_tx_remaining(pt);
+	pt->sent_size = (size_t)0;
 }

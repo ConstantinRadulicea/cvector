@@ -1,5 +1,5 @@
-#ifndef __SENDBUFFER_H__
-#define __SENDBUFFER_H__
+#ifndef __RXTXBUFFER_H__
+#define __RXTXBUFFER_H__
 
 #include <stdint.h>
 
@@ -12,7 +12,6 @@
 
 typedef struct rxtxbuffer {
     void* data;
-    //size_t size;
     size_t capacity;
     size_t sent_size;
     size_t recved_size;
@@ -41,7 +40,9 @@ void* rxtxbuffer_tx_buf(rxtxbuffer* pt);
 
 void* rxtxbuffer_rx_buf(rxtxbuffer* pt);
 
+void rxtxbuffer_shift_tx_buf(rxtxbuffer* pt);
 
 
 
-#endif // !__SENDBUFFER_H__
+
+#endif // !__RXTXBUFFER_H__
