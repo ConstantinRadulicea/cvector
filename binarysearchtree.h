@@ -18,7 +18,7 @@ typedef struct binarytree_node {
 	struct binarysearchtree_node* right;
 }binarysearchtree_node;
 
-typedef struct binarytree {
+typedef struct binarysearchtree {
 	struct binarysearchtree_node* head;
 	binarytree_cmp_data_function cmp_data_function;
 	void* cmp_data_ctx;
