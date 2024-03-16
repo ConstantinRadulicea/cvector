@@ -33,6 +33,9 @@
     <ClInclude Include="rxtxbuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="binarysearchtree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rxtxbuffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="binarysearchtree.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

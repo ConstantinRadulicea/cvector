@@ -131,6 +131,7 @@
     <ClInclude Include="base64.h" />
     <ClInclude Include="cstring.h" />
     <ClInclude Include="cvector.h" />
+    <ClInclude Include="binarysearchtree.h" />
     <ClInclude Include="memswap.h" />
     <ClInclude Include="rxtxbuffer.h" />
     <ClInclude Include="staticcvector.h" />
@@ -139,6 +140,7 @@
     <ClCompile Include="base64.c" />
     <ClCompile Include="cstring.c" />
     <ClCompile Include="cvector.c" />
+    <ClCompile Include="binarysearchtree.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memswap.c" />
     <ClCompile Include="rxtxbuffer.c" />
