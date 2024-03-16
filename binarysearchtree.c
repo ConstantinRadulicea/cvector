@@ -1,15 +1,39 @@
 #include "binarysearchtree.h"
 
 
-void binarysearchtree_init(binarysearchtree_node* _binarytree) {
+int binarysearchtree_insert(binarysearchtree* root, binarysearchtree_node* new_node) {
+    if (root->head == NULL) {
+        root->head = new_node;
+        return BINARYSEARCHTREE_SUCCESS;
+    }
+    return binarysearchtree_node_insert(root->head, new_node, root->cmp_data_function, root->cmp_data_ctx);
+}
+
+binarysearchtree_node* binarysearchtree_search(binarysearchtree* root, void* _data) {
+    return binarysearchtree_node_search(root->head, _data, root->cmp_data_function, root->cmp_data_ctx);
+}
+
+binarysearchtree_node* binarysearchtree_delete(binarysearchtree* root, void* _data) {
+    binarysearchtree_node* data_node;
+    root->head = binarysearchtree_node_delete(root->head, _data, &data_node, root->cmp_data_function, root->cmp_data_ctx);
+    return data_node;
+}
+
+void binarysearchtree_node_init(binarysearchtree_node* _binarytree) {
 	_binarytree->data = NULL;
 	_binarytree->left = NULL;
 	_binarytree->right = NULL;
 }
 
+void binarysearchtree_init(binarysearchtree* _binarytree, binarytree_cmp_data_function cmp_data_function, void* cmp_data_ctx) {
+    _binarytree->head = NULL;
+    _binarytree->cmp_data_function = cmp_data_function;
+    _binarytree->cmp_data_ctx = cmp_data_ctx;
+}
+
 
 // https://www.geeksforgeeks.org/insertion-in-binary-search-tree/
-int binarysearchtree_insert(binarysearchtree_node* root, binarysearchtree_node* new_node, int (*cmp_function)(void* data1, void* data2, void* _ctx), void* ctx) {
+int binarysearchtree_node_insert(binarysearchtree_node* root, binarysearchtree_node* new_node, binarytree_cmp_data_function cmp_function, void* ctx) {
 	binarysearchtree_node* prev;
 	binarysearchtree_node* temp;
 
@@ -48,7 +72,7 @@ int binarysearchtree_insert(binarysearchtree_node* root, binarysearchtree_node* 
 }
 
 
-binarysearchtree_node* binarysearchtree_search(binarysearchtree_node* root, void* _data, int (*cmp_function)(void* data1, void* data2, void* _ctx), void* ctx) {
+binarysearchtree_node* binarysearchtree_node_search(binarysearchtree_node* root, void* _data, binarytree_cmp_data_function cmp_function, void* ctx) {
 	binarysearchtree_node* temp;
 
 	if (root == NULL) {
@@ -73,7 +97,7 @@ binarysearchtree_node* binarysearchtree_search(binarysearchtree_node* root, void
 // Iterative Function to delete
 // 'key' from the BST.
 // https://www.geeksforgeeks.org/binary-search-tree-set-3-iterative-delete/
-binarysearchtree_node* binarysearchtree_delete(binarysearchtree_node* root, void* _data, binarysearchtree_node* data_node, int (*cmp_function)(void* data1, void* data2, void* _ctx), void* ctx)
+binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx)
 {
     binarysearchtree_node* curr = root;
     binarysearchtree_node* prev = NULL;
@@ -98,7 +122,7 @@ binarysearchtree_node* binarysearchtree_delete(binarysearchtree_node* root, void
 
     // node not found
     if (curr == NULL) {
-        data_node = NULL;
+        (*data_node) = NULL;
         return root;
     }
 
@@ -131,7 +155,7 @@ binarysearchtree_node* binarysearchtree_delete(binarysearchtree_node* root, void
 
         // free memory of the
         // node to be deleted.
-        data_node = curr;
+        (*data_node) = curr;
         // free(curr);
     }
 
@@ -176,7 +200,7 @@ binarysearchtree_node* binarysearchtree_delete(binarysearchtree_node* root, void
         }
 
         //curr->data = temp->data;
-        data_node = curr;
+        (*data_node) = curr;
         //free(temp);
     }
     return root;
