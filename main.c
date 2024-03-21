@@ -1,10 +1,33 @@
 #include "cvector.h"
 #include "cstring.h"
+#include "binarysearchtree.h"
 #include <stdio.h>
-
+#include <time.h>
+#include <stdlib.h>
 
 
 #define MB 1048576      // 1 megabyte in bytes = 2^20
+
+int cmp_int(int* num1, int* num2, void* ctx) {
+    if (*num1 > *num2) {
+        return 1;
+    }
+    else if (*num1 < *num2) {
+        return -1;
+    }
+    else {
+        return 0;
+    }
+}
+
+int print_int2(binarysearchtree_node *node, void* ctx) {
+    printf("%d\n", *((int*)(node->data)));
+    //if (*((int*)(node->data)) == 5245)
+    //{
+    //    return 1;
+    //}
+    return 0;
+}
 
 
 
@@ -125,11 +148,174 @@ void test_cvector_shift_left() {
 }
 
 
+void test_binarysearchtree() {
+    binarysearchtree tree;
+    binarysearchtree_node* node, * node1;
+    int* num, * num1, tempnum;
+    binarysearchtree_init(&tree, cmp_int, NULL);
+
+
+    srand(time(NULL));   // Initialization, should only be called once.
+
+    //for (size_t i = 0; i < 100; i++)
+    //{
+    //    num = (int*)malloc(sizeof(int));
+    //    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    //    *num = rand();      // Returns a pseudo-random integer between 0 and RAND_MAX
+    //    binarysearchtree_node_init(node, num);
+    //    binarysearchtree_insert(&tree, node);
+    //}
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 2852;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 2211;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 9330;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 2579;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 7585;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 5576;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 9938;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 8292;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 4882;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 5245;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+    num = (int*)malloc(sizeof(int));
+    node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+    (*num) = 9000;
+    binarysearchtree_node_init(node, num);
+    printf("node: %p num: %p num_val: %d\n", node, num, *num);
+    binarysearchtree_insert(&tree, node);
+
+    binarysearchtree_iterator(&tree, print_int2, NULL);
+
+    printf("\nMAX num: ");
+    print_int2(binarysearchtree_max(&tree), NULL);
+
+    printf("\nMIN num: ");
+    print_int2(binarysearchtree_min(&tree), NULL);
+
+    // letete head
+    tempnum = 2852;
+    printf("\ndelete num: ");
+    print_int2(binarysearchtree_delete(&tree, &tempnum), NULL);
+    binarysearchtree_iterator(&tree, print_int2, NULL);
+
+    tempnum = 7585;
+    printf("\nfound num: ");
+    print_int2(binarysearchtree_find(&tree, &tempnum), NULL);
+    binarysearchtree_iterator(&tree, print_int2, NULL);
+
+    tempnum = 7585;
+    printf("\ndelete num: ");
+    print_int2(binarysearchtree_delete(&tree, &tempnum), NULL);
+    binarysearchtree_iterator(&tree, print_int2, NULL);
+
+    tempnum = 5576;
+    printf("\ndelete num: ");
+    print_int2(binarysearchtree_delete(&tree, &tempnum), NULL);
+    binarysearchtree_iterator(&tree, print_int2, NULL);
+
+}
+
+
+void test_binarysearchtree2() {
+    binarysearchtree tree;
+    binarysearchtree_node* node, * node1;
+    int* num, * num1;
+    binarysearchtree_init(&tree, cmp_int, NULL);
+
+
+    srand(time(NULL));   // Initialization, should only be called once.
+
+    for (size_t i = 0; i < 10; i++)
+    {
+        num = (int*)malloc(sizeof(int));
+        node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+        *num = rand();      // Returns a pseudo-random integer between 0 and RAND_MAX
+        //*num = i;
+        printf("node: %p num: %p num_val: %d\n", node, num, *num);
+        binarysearchtree_node_init(node, num);
+        binarysearchtree_insert(&tree, node);
+    }
+
+    binarysearchtree_iterator(&tree, print_int2, NULL);
+}
+
+
 
 int main() {
-    test_cvector_shift_left();
-    test_cvector();
-    test_base64();
+    //test_cvector_shift_left();
+    //test_cvector();
+    //test_base64();
+    //test_binarysearchtree2();
+    test_binarysearchtree();
     return 0;
 }
 

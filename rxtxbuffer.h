@@ -1,7 +1,7 @@
 #ifndef __RXTXBUFFER_H__
 #define __RXTXBUFFER_H__
 
-#include <stdint.h>
+#include <stddef.h>
 
 #define RXTXBUFFER_SUCCESS						0
 #define RXTXBUFFER_ERROR_INVALID_PARAMETERS		1

@@ -52,11 +52,11 @@ size_t rxtxbuffer_tx_remaining(rxtxbuffer* sendbuf) {
 }
 
 void rxtxbuffer_tx_decrease_size(rxtxbuffer* pt, size_t sent_data_size) {
-	pt->sent_size = MAX(MAX(pt->recved_size, pt->sent_size + sent_data_size), pt->capacity);
+	pt->sent_size = MIN(MIN(pt->recved_size, pt->sent_size + sent_data_size), pt->capacity);
 }
 
 void rxtxbuffer_rx_increase_size(rxtxbuffer* pt, size_t recved_data_size) {
-	pt->recved_size = MAX(pt->recved_size + recved_data_size, pt->capacity);
+	pt->recved_size = MIN(pt->recved_size + recved_data_size, pt->capacity);
 }
 
 void* rxtxbuffer_tx_buf(rxtxbuffer* pt) {

@@ -1,28 +1,29 @@
 #include "binarysearchtree.h"
+#include <stddef.h>
 
 
-int binarysearchtree_insert(binarysearchtree* root, binarysearchtree_node* new_node) {
-    if (root->head == NULL) {
-        root->head = new_node;
+int binarysearchtree_insert(binarysearchtree* _binarytree, binarysearchtree_node* new_node) {
+    if (_binarytree->head == NULL) {
+        _binarytree->head = new_node;
         return BINARYSEARCHTREE_SUCCESS;
     }
-    return binarysearchtree_node_insert(root->head, new_node, root->cmp_data_function, root->cmp_data_ctx);
+    return binarysearchtree_node_insert(_binarytree->head, new_node, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
 }
 
-binarysearchtree_node* binarysearchtree_search(binarysearchtree* root, void* _data) {
-    return binarysearchtree_node_search(root->head, _data, root->cmp_data_function, root->cmp_data_ctx);
+binarysearchtree_node* binarysearchtree_find(binarysearchtree* _binarytree, void* _data) {
+    return binarysearchtree_node_find(_binarytree->head, _data, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
 }
 
-binarysearchtree_node* binarysearchtree_delete(binarysearchtree* root, void* _data) {
+binarysearchtree_node* binarysearchtree_delete(binarysearchtree* _binarytree, void* _data) {
     binarysearchtree_node* data_node;
-    root->head = binarysearchtree_node_delete(root->head, _data, &data_node, root->cmp_data_function, root->cmp_data_ctx);
+    _binarytree->head = binarysearchtree_node_delete(_binarytree->head, _data, &data_node, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
     return data_node;
 }
 
-void binarysearchtree_node_init(binarysearchtree_node* _binarytree) {
-	_binarytree->data = NULL;
-	_binarytree->left = NULL;
-	_binarytree->right = NULL;
+void binarysearchtree_node_init(binarysearchtree_node* root, void* _data) {
+    root->data = _data;
+    root->left = NULL;
+    root->right = NULL;
 }
 
 void binarysearchtree_init(binarysearchtree* _binarytree, binarytree_cmp_data_function cmp_data_function, void* cmp_data_ctx) {
@@ -30,7 +31,6 @@ void binarysearchtree_init(binarysearchtree* _binarytree, binarytree_cmp_data_fu
     _binarytree->cmp_data_function = cmp_data_function;
     _binarytree->cmp_data_ctx = cmp_data_ctx;
 }
-
 
 // https://www.geeksforgeeks.org/insertion-in-binary-search-tree/
 int binarysearchtree_node_insert(binarysearchtree_node* root, binarysearchtree_node* new_node, binarytree_cmp_data_function cmp_function, void* ctx) {
@@ -48,11 +48,11 @@ int binarysearchtree_node_insert(binarysearchtree_node* root, binarysearchtree_n
 
 	while (temp) {
         
-		if (cmp_function(root->data, new_node->data, ctx) > 0) {
+		if (cmp_function(temp->data, new_node->data, ctx) > 0) {
 			prev = temp;
 			temp = temp->left;
 		}
-		else if (cmp_function(root->data, new_node->data, ctx) < 0) {
+		else if (cmp_function(temp->data, new_node->data, ctx) < 0) {
 			prev = temp;
 			temp = temp->right;
 		}
@@ -71,8 +71,7 @@ int binarysearchtree_node_insert(binarysearchtree_node* root, binarysearchtree_n
 	return BINARYSEARCHTREE_SUCCESS;
 }
 
-
-binarysearchtree_node* binarysearchtree_node_search(binarysearchtree_node* root, void* _data, binarytree_cmp_data_function cmp_function, void* ctx) {
+binarysearchtree_node* binarysearchtree_node_find(binarysearchtree_node* root, void* _data, binarytree_cmp_data_function cmp_function, void* ctx) {
 	binarysearchtree_node* temp;
 
 	if (root == NULL) {
@@ -81,10 +80,10 @@ binarysearchtree_node* binarysearchtree_node_search(binarysearchtree_node* root,
 	temp = root;
     
 	while (temp) {
-		if (cmp_function(root->data, _data, ctx) > 0) {
+		if (cmp_function(temp->data, _data, ctx) > 0) {
 			temp = temp->left;
 		}
-		else if (cmp_function(root->data, _data, ctx) < 0) {
+		else if (cmp_function(temp->data, _data, ctx) < 0) {
 			temp = temp->right;
 		}
 		else {
@@ -97,7 +96,7 @@ binarysearchtree_node* binarysearchtree_node_search(binarysearchtree_node* root,
 // Iterative Function to delete
 // 'key' from the BST.
 // https://www.geeksforgeeks.org/binary-search-tree-set-3-iterative-delete/
-binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx)
+binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx)
 {
     binarysearchtree_node* curr = root;
     binarysearchtree_node* prev = NULL;
@@ -206,15 +205,171 @@ binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root,
     return root;
 }
 
+binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx) {
+    binarysearchtree_node* nodeToDelete, *parentNodeToDelete;
+    binarysearchtree_node* replacementNode, *parentReplacementNode;
+    binarysearchtree_node* temp, *parent;
+
+    if (root == NULL) {
+        return NULL;
+    }
+
+    replacementNode = NULL;
+    nodeToDelete = NULL;
+    parent = NULL;
+    temp = root;
+
+    while (temp) {
+        if (cmp_function(temp->data, _data, ctx) > 0) {
+            parent = temp;
+            temp = temp->left;
+        }
+        else if (cmp_function(temp->data, _data, ctx) < 0) {
+            parent = temp;
+            temp = temp->right;
+        }
+        else {
+            nodeToDelete = temp;
+            break;
+        }
+    }
+
+    // node not found
+    if (nodeToDelete == NULL) {
+        return NULL;
+    }
+    parentNodeToDelete = parent;
+
+    // node without any children
+    if (nodeToDelete->left == NULL && nodeToDelete->right == NULL) {
+        if (parentNodeToDelete != NULL)
+        {
+            if (parentNodeToDelete->left == nodeToDelete) {
+                parentNodeToDelete->left = NULL;
+            }
+            else {
+                parentNodeToDelete->right = NULL;
+            }
+        }
+    }
+
+    // node with only 1 children
+    else if (nodeToDelete->left == NULL && nodeToDelete->right != NULL) {
+        if (parentNodeToDelete != NULL) {
+            if (parentNodeToDelete->left == nodeToDelete) {
+                parentNodeToDelete->left = nodeToDelete->right;
+            }
+            else {
+                parentNodeToDelete->right = nodeToDelete->right;
+            }
+        }
+    }
+    else if (nodeToDelete->left != NULL && nodeToDelete->right == NULL) {
+        if (parentNodeToDelete != NULL) {
+            if (parentNodeToDelete->left == nodeToDelete) {
+                parentNodeToDelete->left = nodeToDelete->left;
+            }
+            else {
+                parentNodeToDelete->right = nodeToDelete->left;
+            }
+        }
+    }
+    else {
+        // node with 2 children
+        parentReplacementNode = nodeToDelete;
+        replacementNode = nodeToDelete->right;
+        if (replacementNode != NULL)
+        {
+            while (replacementNode->left) {
+                parentReplacementNode = replacementNode;
+                replacementNode = replacementNode->left;
+            }
+        }
+
+
+        if (nodeToDelete == parentReplacementNode) {
+            replacementNode->left = nodeToDelete->left;
+        }
+        else {
+            if (replacementNode->right != NULL) {
+                parentReplacementNode->left = replacementNode->right;
+            }
+            else {
+                parentReplacementNode->left = NULL;
+            }
+            replacementNode->left = nodeToDelete->left;
+            replacementNode->right = nodeToDelete->right;
+        }
+
+        if (parentNodeToDelete != NULL) {
+            if (parentNodeToDelete->left == nodeToDelete) {
+                parentNodeToDelete->left = replacementNode;
+            }
+            else {
+                parentNodeToDelete->right = replacementNode;
+            }
+        }
+    }
+    *data_node = nodeToDelete;
+    if (nodeToDelete == root)
+    {
+        return replacementNode;
+    }
+    else {
+        return root;
+    }
+}
+
+binarysearchtree_node* binarysearchtree_node_max(binarysearchtree_node* root) {
+    binarysearchtree_node* cur;
+
+    if (root == NULL) {
+        return NULL;
+    }
+
+    cur = root;
+    while (cur->right)
+    {
+        cur = cur->right;
+    }
+    return cur;
+}
+
+binarysearchtree_node* binarysearchtree_max(binarysearchtree* _binarytree) {
+    return binarysearchtree_node_max(_binarytree->head);
+}
+
+binarysearchtree_node* binarysearchtree_node_min(binarysearchtree_node* root) {
+    binarysearchtree_node* cur;
+
+    if (root == NULL) {
+        return NULL;
+    }
+
+    cur = root;
+    while (cur->left)
+    {
+        cur = cur->left;
+    }
+    return cur;
+}
+
+binarysearchtree_node* binarysearchtree_min(binarysearchtree* _binarytree) {
+    return binarysearchtree_node_min(_binarytree->head);
+}
+
+int binarysearchtree_iterator(binarysearchtree* _binarytree, int (*routine)(binarysearchtree_node* node, void* _ctx), void* ctx) {
+    binarysearchtree_node_iterator(_binarytree->head, routine, ctx);
+}
 
 // iterate the three while the function routine returns 0
-int binarysearchtree_iterator(binarysearchtree_node* root, int (*routine)(binarysearchtree_node* node, void* _ctx), void* ctx)
-{
-    if (root == NULL)
+int binarysearchtree_node_iterator(binarysearchtree_node* root, int (*routine)(binarysearchtree_node* node, void* _ctx), void* ctx) {
+    if (root == NULL) {
         return 0;
+    }
 
     // First recur on left child
-    if (binarysearchtree_iterator(root->left, routine, ctx) != 0) {
+    if (binarysearchtree_node_iterator(root->left, routine, ctx) != 0) {
         return 1;
     }
 
@@ -225,5 +380,5 @@ int binarysearchtree_iterator(binarysearchtree_node* root, int (*routine)(binary
     //printf("%d ", root->data);
 
     // Now recur on right child
-    return binarysearchtree_iterator(root->right, routine, ctx);
+    return binarysearchtree_node_iterator(root->right, routine, ctx);
 }
