@@ -96,32 +96,26 @@ binarysearchtree_node* binarysearchtree_node_find(binarysearchtree_node* root, v
 // Iterative Function to delete
 // 'key' from the BST.
 // https://www.geeksforgeeks.org/binary-search-tree-set-3-iterative-delete/
-binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx)
+binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx)
 {
     binarysearchtree_node* curr = root;
     binarysearchtree_node* prev = NULL;
-    binarysearchtree_node* newCurr;
-    binarysearchtree_node* p = NULL;
-    binarysearchtree_node* temp;
 
     // Check if the key is actually
     // present in the BST.
     // the variable prev points to
     // the parent of the key to be deleted.
-    
-    while (curr != NULL && (cmp_function(curr->data, _data, ctx) != 0)) {
+
+    while (curr != NULL && cmp_function(curr->data, _data, ctx) != 0) {
         prev = curr;
-        if (cmp_function(_data, curr->data, ctx) < 0) {
+        if (cmp_function(_data, curr->data, ctx) < 0)
             curr = curr->left;
-        }
-        else {
+        else
             curr = curr->right;
-        }
     }
 
-    // node not found
     if (curr == NULL) {
-        (*data_node) = NULL;
+        *data_node = NULL;
         return root;
     }
 
@@ -131,7 +125,7 @@ binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root
 
         // newCurr will replace
         // the node to be deleted.
-        
+        binarysearchtree_node* newCurr;
 
         // if the left child does not exist.
         if (curr->left == NULL)
@@ -154,13 +148,16 @@ binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root
 
         // free memory of the
         // node to be deleted.
-        (*data_node) = curr;
-        // free(curr);
+        //free(curr);
+        *data_node = curr;
     }
 
     // node to be deleted has
     // two children.
     else {
+        binarysearchtree_node* p = NULL;
+        binarysearchtree_node* temp;
+
         // Compute the inorder successor
         temp = curr->right;
         while (temp->left != NULL) {
@@ -175,18 +172,9 @@ binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root
         // deleted). if it isn't, then make the
         // the left child of its parent equal to
         // the inorder successor'd right child.
-        if (prev->left == curr) {
-            prev->left = temp;
-        }
-        else {
-            prev->right = temp;
-        }
-        temp->left = curr->left;
-        if (p != NULL) {
+        if (p != NULL)
             p->left = temp->right;
-            temp->right = curr->right;
-        }
-        
+
         // if the inorder successor was the
         // curr (i.e. curr = the node which has the
         // same data as the given data by the
@@ -194,18 +182,17 @@ binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root
         // right child of the node to be
         // deleted equal to the right child of
         // the inorder successor.
-        else {
-            // curr->right = temp->right;
-        }
+        else
+            curr->right = temp->right;
 
-        //curr->data = temp->data;
-        (*data_node) = curr;
+        curr->data = temp->data;
         //free(temp);
+        *data_node = temp;
     }
     return root;
 }
 
-binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx) {
+binarysearchtree_node* binarysearchtree_node_delete2(binarysearchtree_node* root, void* _data, binarysearchtree_node** data_node, binarytree_cmp_data_function cmp_function, void* ctx) {
     binarysearchtree_node* nodeToDelete, *parentNodeToDelete;
     binarysearchtree_node* replacementNode, *parentReplacementNode;
     binarysearchtree_node* temp, *parent;
