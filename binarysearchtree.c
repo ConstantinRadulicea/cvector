@@ -135,9 +135,11 @@ binarysearchtree_node* binarysearchtree_node_delete(binarysearchtree_node* root,
 
         // check if the node to
         // be deleted is the root.
-        if (prev == NULL)
+        if (prev == NULL) {
+            *data_node = root;
             return newCurr;
-
+        }
+            
         // check if the node to be deleted
         // is prev's left or right child
         // and then replace this with newCurr
