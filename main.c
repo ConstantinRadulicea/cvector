@@ -29,7 +29,11 @@ int print_int2(binarysearchtree_node *node, void* ctx) {
     return 0;
 }
 
-
+free_node_routine(binarysearchtree_node* node, void* ctx) {
+    print_int2(node, ctx);
+    free(node->data);
+    free(node);
+}
 
 
 void cvector_print(cvector* pt, void (print_func)(const void* _element)) {
@@ -148,7 +152,7 @@ void test_cvector_shift_left() {
 }
 
 
-void test_binarysearchtree() {
+void test_binarysearchtree_iterator2() {
     binarysearchtree tree;
     binarysearchtree_node* node, * node1;
     int* num, * num1, tempnum;
@@ -253,7 +257,12 @@ void test_binarysearchtree() {
     printf("node: %p num: %p num_val: %d\n", node, num, *num);
     binarysearchtree_insert(&tree, node);
 
-    binarysearchtree_iterator(&tree, print_int2, NULL);
+    printf("binarysearchtree_inorder_iterator\n");
+    binarysearchtree_inorder_iterator(&tree, print_int2, NULL);
+    printf("binarysearchtree_preorder_iterator\n");
+    binarysearchtree_preorder_iterator(&tree, print_int2, NULL);
+    printf("binarysearchtree_postorder_iterator\n");
+    binarysearchtree_postorder_iterator(&tree, print_int2, NULL);
 
     printf("\nMAX num: ");
     print_int2(binarysearchtree_max(&tree), NULL);
@@ -265,27 +274,27 @@ void test_binarysearchtree() {
     tempnum = 2852;
     printf("\ndelete num: ");
     print_int2(binarysearchtree_delete(&tree, &tempnum), NULL);
-    binarysearchtree_iterator(&tree, print_int2, NULL);
+    binarysearchtree_inorder_iterator(&tree, print_int2, NULL);
 
     tempnum = 7585;
     printf("\nfound num: ");
     print_int2(binarysearchtree_find(&tree, &tempnum), NULL);
-    binarysearchtree_iterator(&tree, print_int2, NULL);
+    binarysearchtree_inorder_iterator(&tree, print_int2, NULL);
 
     tempnum = 7585;
     printf("\ndelete num: ");
     print_int2(binarysearchtree_delete(&tree, &tempnum), NULL);
-    binarysearchtree_iterator(&tree, print_int2, NULL);
+    binarysearchtree_inorder_iterator(&tree, print_int2, NULL);
 
     tempnum = 5576;
     printf("\ndelete num: ");
     print_int2(binarysearchtree_delete(&tree, &tempnum), NULL);
-    binarysearchtree_iterator(&tree, print_int2, NULL);
-
+    binarysearchtree_inorder_iterator(&tree, print_int2, NULL);
+    binarysearchtree_delete_tree(&tree, free_node_routine, NULL);
 }
 
 
-void test_binarysearchtree2() {
+void test_binarysearchtree_iterator() {
     binarysearchtree tree;
     binarysearchtree_node* node, * node1;
     int* num, * num1;
@@ -294,7 +303,7 @@ void test_binarysearchtree2() {
 
     srand(time(NULL));   // Initialization, should only be called once.
 
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < 1000; i++)
     {
         num = (int*)malloc(sizeof(int));
         node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
@@ -305,7 +314,30 @@ void test_binarysearchtree2() {
         binarysearchtree_insert(&tree, node);
     }
 
-    binarysearchtree_iterator(&tree, print_int2, NULL);
+    binarysearchtree_inorder_iterator(&tree, print_int2, NULL);
+    binarysearchtree_delete_tree(&tree, free_node_routine, NULL);
+}
+
+void test_binarysearchtree_delete_tree() {
+    binarysearchtree tree;
+    binarysearchtree_node* node, * node1;
+    int* num, * num1;
+    binarysearchtree_init(&tree, cmp_int, NULL);
+
+
+    srand(time(NULL));   // Initialization, should only be called once.
+
+    for (size_t i = 0; i < 100000; i++)
+    {
+        num = (int*)malloc(sizeof(int));
+        node = (binarysearchtree_node*)malloc(sizeof(binarysearchtree_node));
+        *num = rand();      // Returns a pseudo-random integer between 0 and RAND_MAX
+        //*num = i;
+        printf("node: %p num: %p num_val: %d\n", node, num, *num);
+        binarysearchtree_node_init(node, num);
+        binarysearchtree_insert(&tree, node);
+    }
+    binarysearchtree_delete_tree(&tree, free_node_routine, NULL);
 }
 
 
@@ -314,8 +346,9 @@ int main() {
     //test_cvector_shift_left();
     //test_cvector();
     //test_base64();
-    //test_binarysearchtree2();
-    test_binarysearchtree();
+    //test_binarysearchtree_iterator();
+    //test_binarysearchtree_iterator2();
+    test_binarysearchtree_delete_tree();
     return 0;
 }
 
