@@ -23,7 +23,7 @@ typedef struct binarysearchtree_node_s {
 
 
 typedef struct binarysearchtree_s {
-	struct binarysearchtree_node_s* head;
+	struct binarysearchtree_node_s* root;
 	binarytree_cmp_data_function cmp_data_function;
 	void* cmp_data_ctx;
 }binarysearchtree;

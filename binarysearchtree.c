@@ -3,20 +3,20 @@
 
 
 int binarysearchtree_insert(binarysearchtree* _binarytree, binarysearchtree_node* new_node) {
-    if (_binarytree->head == NULL) {
-        _binarytree->head = new_node;
+    if (_binarytree->root == NULL) {
+        _binarytree->root = new_node;
         return BINARYSEARCHTREE_SUCCESS;
     }
-    return binarysearchtree_node_insert(_binarytree->head, new_node, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
+    return binarysearchtree_node_insert(_binarytree->root, new_node, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
 }
 
 binarysearchtree_node* binarysearchtree_find(binarysearchtree* _binarytree, void* _data) {
-    return binarysearchtree_node_find(_binarytree->head, _data, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
+    return binarysearchtree_node_find(_binarytree->root, _data, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
 }
 
 binarysearchtree_node* binarysearchtree_delete(binarysearchtree* _binarytree, void* _data) {
     binarysearchtree_node* data_node;
-    _binarytree->head = binarysearchtree_node_delete(_binarytree->head, _data, &data_node, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
+    _binarytree->root = binarysearchtree_node_delete(_binarytree->root, _data, &data_node, _binarytree->cmp_data_function, _binarytree->cmp_data_ctx);
     return data_node;
 }
 
@@ -33,8 +33,8 @@ void binarysearchtree_delete_sub_tree_routine(binarysearchtree_node* node, binar
 }
 
 void binarysearchtree_delete_tree(binarysearchtree* _binarytree, binarytree_delete_tree_function delete_routine, void* _ctx) {
-    binarysearchtree_delete_sub_tree_routine(_binarytree->head, delete_routine, _ctx);
-    _binarytree->head = NULL;
+    binarysearchtree_delete_sub_tree_routine(_binarytree->root, delete_routine, _ctx);
+    _binarytree->root = NULL;
 }
 
 void binarysearchtree_delete_sub_tree(binarysearchtree_node* sub_tree, binarytree_delete_tree_function delete_routine, void* _ctx) {
@@ -50,7 +50,7 @@ void binarysearchtree_node_init(binarysearchtree_node* root, void* _data) {
 }
 
 void binarysearchtree_init(binarysearchtree* _binarytree, binarytree_cmp_data_function cmp_data_function, void* cmp_data_ctx) {
-    _binarytree->head = NULL;
+    _binarytree->root = NULL;
     _binarytree->cmp_data_function = cmp_data_function;
     _binarytree->cmp_data_ctx = cmp_data_ctx;
 }
@@ -233,7 +233,7 @@ binarysearchtree_node* binarysearchtree_node_max(binarysearchtree_node* root) {
 }
 
 binarysearchtree_node* binarysearchtree_max(binarysearchtree* _binarytree) {
-    return binarysearchtree_node_max(_binarytree->head);
+    return binarysearchtree_node_max(_binarytree->root);
 }
 
 binarysearchtree_node* binarysearchtree_node_min(binarysearchtree_node* root) {
@@ -252,11 +252,11 @@ binarysearchtree_node* binarysearchtree_node_min(binarysearchtree_node* root) {
 }
 
 binarysearchtree_node* binarysearchtree_min(binarysearchtree* _binarytree) {
-    return binarysearchtree_node_min(_binarytree->head);
+    return binarysearchtree_node_min(_binarytree->root);
 }
 
 int binarysearchtree_inorder_iterator(binarysearchtree* _binarytree, binarytree_iterator_routine routine, void* ctx) {
-    binarysearchtree_node_inorder_iterator(_binarytree->head, routine, ctx);
+    binarysearchtree_node_inorder_iterator(_binarytree->root, routine, ctx);
 }
 // iterate the three while the function routine returns 0
 int binarysearchtree_node_inorder_iterator(binarysearchtree_node* root, binarytree_iterator_routine routine, void* ctx) {
@@ -280,7 +280,7 @@ int binarysearchtree_node_inorder_iterator(binarysearchtree_node* root, binarytr
 
 
 int binarysearchtree_preorder_iterator(binarysearchtree* _binarytree, binarytree_iterator_routine routine, void* ctx) {
-    binarysearchtree_node_preorder_iterator(_binarytree->head, routine, ctx);
+    binarysearchtree_node_preorder_iterator(_binarytree->root, routine, ctx);
 }
 // iterate the three while the function routine returns 0
 int binarysearchtree_node_preorder_iterator(binarysearchtree_node* root, binarytree_iterator_routine routine, void* ctx) {
@@ -304,7 +304,7 @@ int binarysearchtree_node_preorder_iterator(binarysearchtree_node* root, binaryt
 
 
 int binarysearchtree_postorder_iterator(binarysearchtree* _binarytree, binarytree_iterator_routine routine, void* ctx) {
-    binarysearchtree_node_postorder_iterator(_binarytree->head, routine, ctx);
+    binarysearchtree_node_postorder_iterator(_binarytree->root, routine, ctx);
 }
 // iterate the three while the function routine returns 0
 int binarysearchtree_node_postorder_iterator(binarysearchtree_node* root, binarytree_iterator_routine routine, void* ctx) {
