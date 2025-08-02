@@ -257,15 +257,28 @@ size_t ring_buffer_peek_arr(ring_buffer_t* rb, uint8_t* out_array, size_t len) {
 }
 
 void ring_buffer_advance_tail(ring_buffer_t* rb, size_t len) {
-	if (rb && len <= ring_buffer_used_space(rb)) {
-		rb->tail = (rb->tail + len) % rb->size;
-	}
+	if (rb == NULL) {
+		return;
+	}size_t used = ring_buffer_used_space(rb);
+	size_t advance_len = MIN(len, used);
+	rb->tail = (rb->tail + advance_len) % rb->size;
 }
 
 void ring_buffer_advance_head(ring_buffer_t* rb, size_t len) {
-	if (rb && len <= ring_buffer_free_space(rb)) {
-		rb->head = (rb->head + len) % rb->size;
+	if (rb == NULL) {
+		return;
 	}
+	size_t free_space = ring_buffer_free_space(rb);
+	size_t advance_len = MIN(len, free_space);
+	rb->head = (rb->head + advance_len) % rb->size;
+}
+
+void ring_buffer_clear(ring_buffer_t* rb) {
+	if (rb == NULL) {
+		return;
+	}
+	rb->head = 0;
+	rb->tail = 0;
 }
 
 

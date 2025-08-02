@@ -119,6 +119,12 @@ extern "C" {
      */
     int ring_buffer_is_full(ring_buffer_t* rb);
 
+
+    /**
+	 * @brief clears the ring buffer
+     */
+    void ring_buffer_clear(ring_buffer_t* rb);
+
 #ifdef __cplusplus
 }
 #endif
