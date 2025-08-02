@@ -18,8 +18,8 @@ extern "C" {
     typedef struct {
         uint8_t* buffer;
         size_t size;  // total size of buffer
-        size_t head;  // write position
-        size_t tail;  // read position
+        volatile size_t head;  // write position
+        volatile size_t tail;  // read position
     } ring_buffer_t;
 
     /**
