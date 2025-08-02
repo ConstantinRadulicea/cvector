@@ -1,7 +1,39 @@
 #ifndef __RXTXBUFFER_H__
 #define __RXTXBUFFER_H__
 
+/**
+ * @file rxtxbuffer.h
+ * @brief Linear FIFO-style transmit/receive buffer for UART with DMA support.
+ *
+ * This structure implements a linear buffer for managing TX/RX data queues, where:
+ * - `recved_size` marks how much valid data has been written to the buffer.
+ * - `sent_size` marks how much of that data has already been consumed/transmitted.
+ * - The unread portion lies between `sent_size` and `recved_size`.
+ * - New data is written after `recved_size`, and the buffer can be compacted with `rxtxbuffer_shift_tx_buf()`.
+ *
+ * The layout of the buffer is as follows:
+ *
+ *     +---------------------------------------------------------+
+ *     | Sent     |  To be transmitted  | Free space             |
+ *     | [0:sent) |  [sent:recved)      | [recved:capacity)      |
+ *     +---------------------------------------------------------+
+ *      ^         ^                    ^                         ^
+ *     data     sent_size         recved_size                capacity
+ *
+ * Example usage for UART TX with DMA:
+ * - Write new data at `rxtxbuffer_rx_buf()`, increase with `rxtxbuffer_rx_increase_size()`.
+ * - Start DMA from `rxtxbuffer_tx_buf()` of length `rxtxbuffer_tx_remaining()`.
+ * - On completion, call `rxtxbuffer_tx_decrease_size()` and optionally `rxtxbuffer_shift_tx_buf()` to compact the buffer.
+ *
+ * This approach simplifies chunked DMA transmission without needing a true circular buffer.
+ */
+
+
 #include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define RXTXBUFFER_SUCCESS						0
 #define RXTXBUFFER_ERROR_INVALID_PARAMETERS		1
@@ -47,6 +79,8 @@ void* rxtxbuffer_rx_buf(rxtxbuffer* pt);
 void rxtxbuffer_shift_tx_buf(rxtxbuffer* pt);
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !__RXTXBUFFER_H__

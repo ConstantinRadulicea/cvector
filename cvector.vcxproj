@@ -132,7 +132,9 @@
     <ClInclude Include="cstring.h" />
     <ClInclude Include="cvector.h" />
     <ClInclude Include="binarysearchtree.h" />
+    <ClInclude Include="linked_list.h" />
     <ClInclude Include="memswap.h" />
+    <ClInclude Include="ringbuffer.h" />
     <ClInclude Include="rxtxbuffer.h" />
     <ClInclude Include="staticcvector.h" />
   </ItemGroup>
@@ -143,18 +145,9 @@
     <ClCompile Include="binarysearchtree.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memswap.c" />
+    <ClCompile Include="ringbuffer.c" />
     <ClCompile Include="rxtxbuffer.c" />
     <ClCompile Include="staticcvector.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets'))" />
-  </Target>
 </Project>
