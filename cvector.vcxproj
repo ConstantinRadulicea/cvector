@@ -134,6 +134,7 @@
     <ClInclude Include="binarysearchtree.h" />
     <ClInclude Include="linked_list.h" />
     <ClInclude Include="memswap.h" />
+    <ClInclude Include="PPP_custom.h" />
     <ClInclude Include="ringbuffer.h" />
     <ClInclude Include="rxtxbuffer.h" />
     <ClInclude Include="staticcvector.h" />
@@ -145,6 +146,7 @@
     <ClCompile Include="binarysearchtree.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memswap.c" />
+    <ClCompile Include="PPP_custom.c" />
     <ClCompile Include="ringbuffer.c" />
     <ClCompile Include="rxtxbuffer.c" />
     <ClCompile Include="staticcvector.c" />

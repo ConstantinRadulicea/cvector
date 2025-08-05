@@ -39,6 +39,12 @@
     <ClInclude Include="linked_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ringbuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PPP_custom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -63,6 +69,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="binarysearchtree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ringbuffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PPP_custom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

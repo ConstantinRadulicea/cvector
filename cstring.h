@@ -3,6 +3,10 @@
 
 #include "cvector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CSTRING_DEFAULT(vec) vec.data=NULL; vec.size=0; vec.capacity=0; vec.size_type=0
 
 typedef cvector cstring;
@@ -109,5 +113,9 @@ int cstring_Base64decode(cstring* _Decoded, const char* _ToDecode, size_t _NunOf
 
 // utility to free the memory allocated
 void cstring_free(cstring* pt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

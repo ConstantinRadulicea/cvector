@@ -14,6 +14,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CVECTOR_SUCCESS 0
 #define CVECTOR_ERROR_MEMORY_ALLOCATION 1
 #define CVECTOR_ERROR_MEMORY_REALLOCATION 2
@@ -124,6 +128,8 @@ void cvector_free(cvector* pt);
 // free the memory of an array of vectors
 void cvector_free_array(cvector* pt);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !__CVECTOR_H__

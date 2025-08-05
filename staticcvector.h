@@ -2,6 +2,10 @@
 #define __STATICCVECTOR_H__
 #include "cvector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define STATICCVECTOR_SUCCESS						CVECTOR_SUCCESS
 #define STATICCVECTOR_ERROR_INVALID_PARAMETERS		CVECTOR_ERROR_INVALID_PARAMETERS
 #define STATICCVECTOR_ERROR_EXEEDED_MAX_CAPACITY	10
@@ -72,5 +76,8 @@ size_t staticcvector_shift_left(staticcvector* pt, size_t start_index, size_t po
 
 int staticcvector_isvalid(staticcvector* _cvector);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

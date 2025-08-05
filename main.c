@@ -5,6 +5,8 @@
 #include <time.h>
 #include <stdlib.h>
 
+#include "PPP_custom.h"
+
 
 #define MB 1048576      // 1 megabyte in bytes = 2^20
 
@@ -348,7 +350,10 @@ int main() {
     //test_base64();
     //test_binarysearchtree_iterator();
     //test_binarysearchtree_iterator2();
-    test_binarysearchtree_delete_tree();
+    //test_binarysearchtree_delete_tree();
+
+	//ppp_custom_test();
+    ppp_custom_test_receive();
     return 0;
 }
 
