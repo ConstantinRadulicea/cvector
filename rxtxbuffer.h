@@ -23,7 +23,7 @@
  * Example usage for UART TX with DMA:
  * - Write new buffer at `rxtxbuffer_free_space_ptr()`, increase with `rxtxbuffer_data_increase_size()`.
  * - Start DMA from `rxtxbuffer_data_ptr()` of length `rxtxbuffer_data_remaining()`.
- * - On completion, call `rxtxbuffer_data_decrease_size()` and optionally `rxtxbuffer_shift_data_buf()` to compact the buffer.
+ * - On completion, call `rxtxbuffer_sent_data_increase_size()` and optionally `rxtxbuffer_shift_data_buf()` to compact the buffer.
  *
  * This approach simplifies chunked DMA transmission without needing a true circular buffer.
  */
@@ -102,11 +102,11 @@ size_t rxtxbuffer_free_space(rxtxbuffer_t* sendbuf);
 size_t rxtxbuffer_data_remaining(rxtxbuffer_t* sendbuf);
 
 /**
- * @brief Decrease the number of bytes pending transmission.
+ * @brief Increase the number of bytes that were sent.
  * @param pt Pointer to RX/TX buffer struct
  * @param sent_data_size Number of bytes that were transmitted
  */
-void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t sent_data_size);
+void rxtxbuffer_sent_data_increase_size(rxtxbuffer_t* pt, size_t sent_data_size);
 
 /**
  * @brief Increase the number of valid data bytes (after receiving new data).
@@ -114,6 +114,22 @@ void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t sent_data_size);
  * @param recved_data_size Number of bytes received and added
  */
 void rxtxbuffer_data_increase_size(rxtxbuffer_t* pt, size_t recved_data_size);
+
+/**
+ * @brief Decrease the total valid data size in the buffer.
+ *        Typically used when discarding processed or invalid data.
+ * @param pt Pointer to RX/TX buffer struct
+ * @param decreased_size Number of bytes to remove from data_size
+ */
+void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size);
+
+/**
+ * @brief Decrease the "sent size" counter, effectively rewinding transmission progress.
+ *        Typically used when a transmission fails and the same data must be re-sent.
+ * @param pt Pointer to RX/TX buffer struct
+ * @param decreased_size Number of bytes to subtract from sent_size
+ */
+void rxtxbuffer_sent_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size);
 
 /**
  * @brief Get pointer to the valid data region in the buffer.

@@ -48,12 +48,35 @@ size_t rxtxbuffer_data_remaining(rxtxbuffer_t* sendbuf) {
 	return sendbuf->data_size - sendbuf->sent_size;
 }
 
-void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t sent_data_size) {
+void rxtxbuffer_sent_data_increase_size(rxtxbuffer_t* pt, size_t sent_data_size) {
 	pt->sent_size = MIN(MIN(pt->data_size, pt->sent_size + sent_data_size), pt->capacity);
 }
 
 void rxtxbuffer_data_increase_size(rxtxbuffer_t* pt, size_t recved_data_size) {
 	pt->data_size = MIN(pt->data_size + recved_data_size, pt->capacity);
+}
+
+void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size) {
+	if (decreased_size >= pt->data_size) {
+		pt->data_size = 0;
+		pt->sent_size = 0;
+	}
+	else
+	{
+		pt->data_size -= decreased_size;
+		if (pt->sent_size > pt->data_size) {
+			pt->sent_size = pt->data_size; // Ensure sent size does not exceed data size
+		}
+	}
+}
+
+void rxtxbuffer_sent_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size) {
+	if (decreased_size >= pt->data_size) {
+		pt->sent_size = 0;
+	}
+	else {
+		pt->sent_size -= decreased_size;
+	}
 }
 
 void* rxtxbuffer_data_ptr(rxtxbuffer_t* pt) {
