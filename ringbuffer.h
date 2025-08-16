@@ -93,6 +93,12 @@ extern "C" {
     size_t ring_buffer_peek_arr(ring_buffer_t* rb, uint8_t* out_array, size_t len);
 
     /**
+ * @brief Peek bytes from the buffer without advancing the tail
+ * @return number of bytes peeked at an offset from the tail
+ */
+    size_t ring_buffer_peek_arr_offset(ring_buffer_t* rb, uint8_t* out_array, size_t len, size_t offset);
+
+    /**
      * @brief Get pointer to the current write position
      */
     uint8_t* ring_buffer_write_ptr(ring_buffer_t* rb);

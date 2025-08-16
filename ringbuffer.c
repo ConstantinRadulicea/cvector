@@ -255,6 +255,48 @@ size_t ring_buffer_peek_arr(ring_buffer_t* rb, uint8_t* out_array, size_t len) {
 	return to_peek;
 }
 
+
+size_t ring_buffer_peek_arr_offset(ring_buffer_t* rb, uint8_t* out_array, size_t len, size_t offset) {
+	if (rb == NULL || rb->buffer == NULL || rb->size == (size_t)0 || out_array == NULL) {
+		return (size_t)0;
+	}
+
+	size_t temp_offset = offset; // Preserve original offset
+	size_t used = ring_buffer_used_space(rb);
+
+	if (offset >= used) {
+		return (size_t)0; // Invalid offset
+	}
+
+	if (used == (size_t)0) {
+		return (size_t)0; // Nothing to read
+	}
+
+	size_t to_peek = MIN(len + offset, used);
+
+	// How many bytes we can read linearly from tail to end
+	size_t linear_data = ring_buffer_linear_used_space(rb);
+	size_t first_chunk = MIN(to_peek, linear_data);
+
+	if (first_chunk > offset) {
+		memcpy(out_array, &rb->buffer[rb->tail + offset], first_chunk - offset);
+		temp_offset = 0; // Reset offset after first chunk
+	}
+	else {
+		temp_offset -= first_chunk; // Adjust offset for next chunk
+	}
+
+	if (to_peek > first_chunk) {
+		// Wraparound peek from the beginning
+		size_t second_chunk = to_peek - first_chunk;
+
+		memcpy(&out_array[first_chunk - offset], &rb->buffer[0 + temp_offset], second_chunk - temp_offset);
+		temp_offset = 0; // Reset offset after first chunk
+	}
+
+	return to_peek - offset;
+}
+
 void ring_buffer_advance_tail(ring_buffer_t* rb, size_t len) {
 	if (rb == NULL) {
 		return;

@@ -343,6 +343,45 @@ void test_binarysearchtree_delete_tree() {
 }
 
 
+int ring_buffer_test_peek_offset(void) {
+    uint8_t buf[8];
+    for (int i = 0; i < 8; i++) buf[i] = i; // fill buffer with known pattern
+
+    ring_buffer_t rb = {
+        .buffer = buf,
+        .size = 8,
+        .head = 2,   // head BEFORE tail (wrap case)
+        .tail = 5
+    };
+
+    // This means buffer contains bytes: [5,6,7,0,1] in order
+    printf("Ring buffer state:\n");
+    printf(" size=%zu head=%zu tail=%zu used=%zu\n",
+        rb.size, rb.head, rb.tail, ring_buffer_used_space(&rb));
+
+    uint8_t out[8];
+
+    // Example 1: peek 3 bytes starting at offset 0
+    size_t n1 = ring_buffer_peek_arr_offset(&rb, out, 3, 0);
+    printf("Peek offset=0 len=3 -> copied=%zu bytes: ", n1);
+    for (size_t i = 0; i < n1; i++) printf("%u ", out[i]);
+    printf("\n");
+
+    // Example 2: peek 3 bytes starting at offset 2 (wraps into index 0)
+    size_t n2 = ring_buffer_peek_arr_offset(&rb, out, 3, 2);
+    printf("Peek offset=2 len=3 -> copied=%zu bytes: ", n2);
+    for (size_t i = 0; i < n2; i++) printf("%u ", out[i]);
+    printf("\n");
+
+    // Example 3: peek more than available
+    size_t n3 = ring_buffer_peek_arr_offset(&rb, out, 10, 0);
+    printf("Peek offset=0 len=10 -> copied=%zu bytes: ", n3);
+    for (size_t i = 0; i < n3; i++) printf("%u ", out[i]);
+    printf("\n");
+
+    return 0;
+}
+
 
 int main() {
     //test_cvector_shift_left();
@@ -356,6 +395,7 @@ int main() {
     //ppp_stream_test();
     //ppp_custom_test_receive();
 	tcp_test_1();
+    //ring_buffer_test_peek_offset();
     return 0;
 }
 
