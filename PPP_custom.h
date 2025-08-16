@@ -263,6 +263,14 @@ typedef struct {
 } tcp_t;
 
 
+/*
+mtu -> Maximum Transmission Unit, the maximum size of payload that can fin in a packet.
+rx_ring_mem -> size > 1
+tx_ring_mem -> size > 1
+send_pkt_buf -> size = TCP_MAX_PACKET_SIZE(mtu)
+ppp_recv_buffer -> size = TCP_PPP_ENCODED_FRAME_MAX_LEN(mtu)
+ppp_send_buffer -> size = TCP_PPP_ENCODED_FRAME_MAX_LEN(mtu)
+*/
 uint8_t tcp_init(tcp_t* t,
 	uint8_t* rx_ring_mem, size_t rx_ring_size,
 	uint8_t* tx_ring_mem, size_t tx_ring_size,

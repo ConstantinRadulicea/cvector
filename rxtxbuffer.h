@@ -2,28 +2,28 @@
 #define __RXTXBUFFER_H__
 
 /**
- * @file rxtxbuffer.h
+ * @file rxtxbuffer_t.h
  * @brief Linear FIFO-style transmit/receive buffer for UART with DMA support.
  *
- * This structure implements a linear buffer for managing TX/RX data queues, where:
- * - `recved_size` marks how much valid data has been written to the buffer.
- * - `sent_size` marks how much of that data has already been consumed/transmitted.
- * - The unread portion lies between `sent_size` and `recved_size`.
- * - New data is written after `recved_size`, and the buffer can be compacted with `rxtxbuffer_shift_tx_buf()`.
+ * This structure implements a linear buffer for managing TX/RX buffer queues, where:
+ * - `data_size` marks how much valid buffer has been written to the buffer.
+ * - `sent_size` marks how much of that buffer has already been consumed/transmitted.
+ * - The unread portion lies between `sent_size` and `data_size`.
+ * - New buffer is written after `data_size`, and the buffer can be compacted with `rxtxbuffer_shift_data_buf()`.
  *
  * The layout of the buffer is as follows:
  *
- *     +---------------------------------------------------------+
- *     | Sent     |  To be transmitted  | Free space             |
- *     | [0:sent) |  [sent:recved)      | [recved:capacity)      |
- *     +---------------------------------------------------------+
- *      ^         ^                    ^                         ^
- *     data     sent_size         recved_size                capacity
+ *     +-------------------------------------------------------------------------+
+ *     | Sent          |  To be transmitted          | Free space                |
+ *     | [0:sent_size) |  [sent_size:data_size)      | [data_size:capacity)      |
+ *     +-------------------------------------------------------------------------+
+ *     ^               ^                             ^                           ^
+ *     buffer          sent_size                     data_size                   capacity
  *
  * Example usage for UART TX with DMA:
- * - Write new data at `rxtxbuffer_rx_buf()`, increase with `rxtxbuffer_rx_increase_size()`.
- * - Start DMA from `rxtxbuffer_tx_buf()` of length `rxtxbuffer_tx_remaining()`.
- * - On completion, call `rxtxbuffer_tx_decrease_size()` and optionally `rxtxbuffer_shift_tx_buf()` to compact the buffer.
+ * - Write new buffer at `rxtxbuffer_free_space_ptr()`, increase with `rxtxbuffer_data_increase_size()`.
+ * - Start DMA from `rxtxbuffer_data_ptr()` of length `rxtxbuffer_data_remaining()`.
+ * - On completion, call `rxtxbuffer_data_decrease_size()` and optionally `rxtxbuffer_shift_data_buf()` to compact the buffer.
  *
  * This approach simplifies chunked DMA transmission without needing a true circular buffer.
  */
@@ -38,45 +38,104 @@ extern "C" {
 #define RXTXBUFFER_SUCCESS						0
 #define RXTXBUFFER_ERROR_INVALID_PARAMETERS		1
 
-#define RXTXBUFFER_DEFAULT(vec) vec.data=NULL; vec.capacity=(size_t)0; vec.sent_size=(size_t)0; vec.recved_size=(size_t)0
+#define RXTXBUFFER_DEFAULT(vec) vec.buffer=NULL; vec.capacity=(size_t)0; vec.sent_size=(size_t)0; vec.data_size=(size_t)0
 
 #define RXTXBUFFER_CAST(ptr, type) ((type)(ptr))
 
 typedef struct rxtxbuffer {
-    void* data;
-    size_t capacity;
-    size_t sent_size;
-    size_t recved_size;
-}rxtxbuffer;
+    void*  buffer;      // Pointer to raw memory buffer
+    size_t capacity;    // Maximum size of buffer in bytes
+    size_t sent_size;   // Amount of data already consumed/transmitted
+    size_t data_size;   // Amount of valid data currently stored
+} rxtxbuffer_t;
 
 
-void* rxtxbuffer_data(rxtxbuffer* pt);
+/**
+ * @brief Get raw pointer to the internal buffer.
+ * @param pt Pointer to RX/TX buffer struct
+ * @return Pointer to underlying memory buffer
+ */
+void* rxtxbuffer_buffer(rxtxbuffer_t* pt);
 
-size_t rxtxbuffer_sent_size(rxtxbuffer* pt);
+/**
+ * @brief Get number of bytes already consumed/transmitted.
+ * @param pt Pointer to RX/TX buffer struct
+ * @return Number of bytes marked as "sent"
+ */
+size_t rxtxbuffer_sent_size(rxtxbuffer_t* pt);
 
-size_t rxtxbuffer_recved_size(rxtxbuffer* pt);
+/**
+ * @brief Get number of valid data bytes currently stored in the buffer.
+ * @param pt Pointer to RX/TX buffer struct
+ * @return Data size in bytes
+ */
+size_t rxtxbuffer_data_size(rxtxbuffer_t* pt);
 
-size_t rxtxbuffer_capacity(rxtxbuffer* pt);
+/**
+ * @brief Get total capacity of the buffer.
+ * @param pt Pointer to RX/TX buffer struct
+ * @return Maximum buffer size in bytes
+ */
+size_t rxtxbuffer_capacity(rxtxbuffer_t* pt);
 
-int rxtxbuffer_init(rxtxbuffer* _Cvector, void* buf, size_t _recved_size, size_t _sent_size, size_t _capacity);
+/**
+ * @brief Initialize a buffer manager with a memory block.
+ * @param _Cvector Pointer to RX/TX buffer struct
+ * @param buf Pointer to pre-allocated memory block
+ * @param _capacity Size of the memory block in bytes
+ * @return 0 on success
+ */
+int rxtxbuffer_init(rxtxbuffer_t* _Cvector, void* buf, size_t _capacity);
 
-// total ammount of data that is free to be received
-size_t rxtxbuffer_rx_remaining(rxtxbuffer* sendbuf);
+/**
+ * @brief Get total free space available in the buffer (for new data).
+ * @param sendbuf Pointer to RX/TX buffer struct
+ * @return Number of free bytes available
+ */
+size_t rxtxbuffer_free_space(rxtxbuffer_t* sendbuf);
 
-// total ammount of tx data that remains to be sent
-size_t rxtxbuffer_tx_remaining(rxtxbuffer* sendbuf);
+/**
+ * @brief Get number of bytes still pending transmission (not sent yet).
+ * @param sendbuf Pointer to RX/TX buffer struct
+ * @return Number of remaining bytes to send
+ */
+size_t rxtxbuffer_data_remaining(rxtxbuffer_t* sendbuf);
 
-// decrease the ammount of the tx data that remains to be sent
-void rxtxbuffer_tx_decrease_size(rxtxbuffer* pt, size_t sent_data_size);
+/**
+ * @brief Decrease the number of bytes pending transmission.
+ * @param pt Pointer to RX/TX buffer struct
+ * @param sent_data_size Number of bytes that were transmitted
+ */
+void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t sent_data_size);
 
-// increase the ammount of the rx data that was received
-void rxtxbuffer_rx_increase_size(rxtxbuffer* pt, size_t recved_data_size);
+/**
+ * @brief Increase the number of valid data bytes (after receiving new data).
+ * @param pt Pointer to RX/TX buffer struct
+ * @param recved_data_size Number of bytes received and added
+ */
+void rxtxbuffer_data_increase_size(rxtxbuffer_t* pt, size_t recved_data_size);
 
-void* rxtxbuffer_tx_buf(rxtxbuffer* pt);
+/**
+ * @brief Get pointer to the valid data region in the buffer.
+ * @param pt Pointer to RX/TX buffer struct
+ * @return Pointer to start of valid data
+ */
+void* rxtxbuffer_data_ptr(rxtxbuffer_t* pt);
 
-void* rxtxbuffer_rx_buf(rxtxbuffer* pt);
+/**
+ * @brief Get pointer to the free space region in the buffer (where new data can be written).
+ * @param pt Pointer to RX/TX buffer struct
+ * @return Pointer to first free byte
+ */
+void* rxtxbuffer_free_space_ptr(rxtxbuffer_t* pt);
 
-void rxtxbuffer_shift_tx_buf(rxtxbuffer* pt);
+/**
+ * @brief Shift valid data in the buffer to the beginning, removing consumed bytes.
+ *        Typically used after transmission to make space for new incoming data.
+ * @param pt Pointer to RX/TX buffer struct
+ */
+void rxtxbuffer_shift_data_buf(rxtxbuffer_t* pt);
+
 
 
 #ifdef __cplusplus
