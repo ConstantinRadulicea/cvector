@@ -197,13 +197,17 @@ uint8_t ppp_stream_init(
         return PPP_ERR_INVALID_PARAMETERS;
     }
 
-    stream->rx_buffer = rx_buffer;
-    stream->tx_buffer = tx_buffer;
+    //stream->rx_buffer = rx_buffer;
+    //stream->tx_buffer = tx_buffer;
+
+    rxtxbuffer_init(&stream->rx_buffer, rx_buffer, buffer_capacity);
+    rxtxbuffer_init(&stream->tx_buffer, tx_buffer, buffer_capacity);
+
     stream->buffer_capacity = buffer_capacity;
     stream->MTU_size = mtu;
 
-    stream->rx_frame_received_size = 0;
-    stream->tx_frame_sent_size = 0;
+    //stream->rx_frame_received_size = 0;
+    //stream->tx_frame_sent_size = 0;
 
     stream->rx_state = PPP_RX_FRAME_PARSING_STATE_WAIT_FOR_START_FLAG;
     stream->tx_state = PPP_RX_FRAME_PARSING_STATE_WAIT_FOR_START_FLAG;
@@ -230,35 +234,34 @@ uint8_t ppp_stream_init(
 
 
 int8_t ppp_stream_parse_byte(ppp_stream_t* stream, uint8_t byte) {
-    if (!stream || !stream->rx_buffer) return PPP_ERR_INVALID_PARAMETERS;
+    if (!stream) return PPP_ERR_INVALID_PARAMETERS;
 
 ppp_stream_parse_byte_start_lable:
     switch (stream->rx_state) {
     case PPP_RX_FRAME_PARSING_STATE_WAIT_FOR_START_FLAG:
         if (byte == PPP_FLAG) {
-            stream->rx_frame_received_size = 0;
-            stream->rx_buffer[stream->rx_frame_received_size++] = byte;
+			rxtxbuffer_clear(&stream->rx_buffer);
+            rxtxbuffer_push_arr(&stream->rx_buffer, &byte, 1);
             stream->rx_state = PPP_RX_FRAME_PARSING_STATE_RECEIVING_BODY;
         }
         break;
 
     case PPP_RX_FRAME_PARSING_STATE_RECEIVING_BODY:
-        if (stream->rx_frame_received_size >= stream->buffer_capacity) {
+        if (rxtxbuffer_data_size(&stream->rx_buffer) >= stream->buffer_capacity) {
             ppp_stream_drop_recv_frame(stream);
             goto ppp_stream_parse_byte_start_lable;
             //return PPP_ERR_OUTPUT_BUFFER_TOO_SMALL;
         }
-
-        stream->rx_buffer[stream->rx_frame_received_size++] = byte;
+        rxtxbuffer_push_arr(&stream->rx_buffer, &byte, 1);
 
         if (byte == PPP_FLAG) {
-            if (stream->rx_frame_received_size < PPP_PROTOCOL_OVERHEAD_BYTE_SIZE) {
+            if (rxtxbuffer_data_size(&stream->rx_buffer) < PPP_PROTOCOL_OVERHEAD_BYTE_SIZE) {
                 ppp_stream_drop_recv_frame(stream);
                 goto ppp_stream_parse_byte_start_lable;
             }
             // We have a full frame
             ppp_decoded_frame_t* message = &stream->rx_message;
-            int8_t result = ppp_decode(stream->rx_buffer, stream->rx_frame_received_size, stream->rx_buffer, message);
+            int8_t result = ppp_decode(rxtxbuffer_buffer(&stream->rx_buffer), rxtxbuffer_data_size(&stream->rx_buffer), rxtxbuffer_buffer(&stream->rx_buffer), message);
 
             if (result == PPP_SUCCESS) {
                 if (message->payload_size > stream->MTU_size)
@@ -290,12 +293,13 @@ int8_t ppp_stream_send_routine(ppp_stream_t* stream, ppp_send_buffer_fcn_t send_
     int sent_now = 0;
 
     if (stream->tx_state == PPP_TX_FRAME_PARSING_STATE_SENDING) {
-        sent_now = send_fcn(&(stream->tx_buffer[stream->tx_frame_sent_size]), stream->tx_message.frame_size - stream->tx_frame_sent_size, context);
+        
+        sent_now = send_fcn(rxtxbuffer_data_ptr(&stream->tx_buffer), stream->tx_message.frame_size - rxtxbuffer_sent_size(&stream->tx_buffer), context);
         if (sent_now < 0) {
             return PPP_ERR_SENDING_OPERATION_ERROR;
         }
-		stream->tx_frame_sent_size += sent_now;
-        if (stream->tx_frame_sent_size >= stream->tx_message.frame_size) {
+		rxtxbuffer_sent_data_increase_size(&stream->tx_buffer, sent_now);
+        if (rxtxbuffer_sent_size(&stream->tx_buffer) >= stream->tx_message.frame_size) {
             stream->tx_state = PPP_TX_FRAME_PARSING_STATE_SENDING_COMPLETED;
 			ppp_on_tx_frame(stream, &(stream->tx_message));
         }
@@ -317,20 +321,22 @@ int8_t ppp_stream_send_frame(ppp_stream_t* stream, const ppp_decoded_frame_t mes
     }
     else {
         size_t enc_len;
-        int8_t result = ppp_encode(message.payload, message.payload_size, stream->tx_buffer, stream->buffer_capacity, &enc_len, message.address, message.control, message.protocol);
-        
+		rxtxbuffer_clear(&stream->tx_buffer);
+        int8_t result = ppp_encode(message.payload, message.payload_size, rxtxbuffer_buffer(&stream->tx_buffer), stream->buffer_capacity, &enc_len, message.address, message.control, message.protocol);
+		
+
 		if (result == PPP_SUCCESS) {
+            rxtxbuffer_data_increase_size(&stream->tx_buffer, enc_len);
             ppp_encoded_frame_t encoded_message;
 			encoded_message.address = message.address;
 			encoded_message.control = message.control;
 			encoded_message.protocol = message.protocol;
-			encoded_message.frame = stream->tx_buffer;
+			encoded_message.frame = rxtxbuffer_buffer(&stream->tx_buffer);
 			encoded_message.frame_size = enc_len;
             encoded_message.payload_size = message.payload_size;
 
+            
 			stream->tx_message = encoded_message;
-			stream->tx_frame_sent_size = 0;
-
 			stream->tx_state = PPP_TX_FRAME_PARSING_STATE_SENDING;
 	    }
 
@@ -340,12 +346,12 @@ int8_t ppp_stream_send_frame(ppp_stream_t* stream, const ppp_decoded_frame_t mes
 
 void ppp_stream_drop_recv_frame(ppp_stream_t* stream) {
     stream->rx_state = PPP_RX_FRAME_PARSING_STATE_WAIT_FOR_START_FLAG;
-    stream->rx_frame_received_size = 0;
+    rxtxbuffer_clear(&stream->rx_buffer);
 }
 
 void ppp_stream_drop_send_frame(ppp_stream_t* stream) {
     stream->tx_state = PPP_TX_FRAME_PARSING_STATE_NOTHING;
-    stream->tx_frame_sent_size = 0;
+	rxtxbuffer_reset_sent_size(&stream->tx_buffer);
 }
 
 void ppp_stream_tick(ppp_stream_t* stream) {
@@ -721,12 +727,22 @@ static void on_rx_frame(ppp_stream_t* stream, ppp_decoded_frame_t* message, void
 }
 
 static void on_tx_frame(ppp_stream_t* stream, ppp_encoded_frame_t* message, void* context) {
-    printf("TX CALLBACK: Frame sent with size = %u\n", stream->tx_frame_sent_size);
+    printf("TX CALLBACK: Frame sent with size = %u\n", rxtxbuffer_sent_size(&stream->tx_buffer));
 }
 
 int test_send_function(void* buffer, int buffer_size, void* context) {
     ppp_stream_t* stream = (ppp_stream_t*)context;
     uint8_t* bytes = (uint8_t*)buffer;
+
+    for (size_t i = 0; i < rxtxbuffer_data_remaining(&stream->tx_buffer); i++)
+    {
+        printf("%c", ((char*)rxtxbuffer_buffer(&stream->tx_buffer))[i]);
+    }printf("\n");
+
+    for (size_t i = 0; i < buffer_size; i++)
+    {
+        printf("%c", bytes[i]);
+    }printf("\n");
 
     for (int i = 0; i < buffer_size; i++) {
         ppp_stream_parse_byte(stream, bytes[i]);
@@ -781,7 +797,8 @@ void ppp_stream_test(void) {
         //}
 
         if (i == 1) {
-            stream.tx_buffer[0] = 0;
+			//((uint8_t*)rxtxbuffer_data_ptr(&stream.tx_buffer))[0] = 0; // Simulate an error in the first byte
+            //stream.tx_buffer.[0] = 0;
         }
 
         // Send data and parse back as if it was received byte-by-byte

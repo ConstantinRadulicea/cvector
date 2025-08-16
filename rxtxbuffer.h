@@ -132,6 +132,22 @@ void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size);
 void rxtxbuffer_sent_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size);
 
 /**
+ * @brief Clear the entire buffer.
+ *        All data is discarded and both counters are reset to 0.
+ * @param pt Pointer to RX/TX buffer struct
+ */
+void rxtxbuffer_clear(rxtxbuffer_t* pt);
+
+/**
+ * @brief Reset the "sent size" counter without modifying data_size.
+ *        Typically used when transmission restarts or is retried.
+ * @param pt Pointer to RX/TX buffer struct
+ */
+void rxtxbuffer_reset_sent_size(rxtxbuffer_t* pt);
+
+size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, void* data, size_t data_size);
+
+/**
  * @brief Get pointer to the valid data region in the buffer.
  * @param pt Pointer to RX/TX buffer struct
  * @return Pointer to start of valid data

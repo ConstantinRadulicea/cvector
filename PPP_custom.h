@@ -45,6 +45,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "ringbuffer.h"
+#include "rxtxbuffer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,12 +166,10 @@ typedef int (*ppp_send_buffer_fcn_t)(void* buffer, int buffer_size, void* contex
 typedef int (*ppp_recv_buffer_fcn_t)(void* buffer, int buffer_size, void* context);
 
 typedef struct ppp_stream {
-	uint8_t* rx_buffer;
-	uint8_t* tx_buffer;
+	rxtxbuffer_t rx_buffer;
+	rxtxbuffer_t tx_buffer;
 	uint16_t buffer_capacity;
 	uint16_t MTU_size;
-	uint16_t tx_frame_sent_size;
-	uint16_t rx_frame_received_size;
 	ppp_decoded_frame_t rx_message;
 	ppp_encoded_frame_t tx_message;
 	ppp_rx_frame_parsing_state_t rx_state;

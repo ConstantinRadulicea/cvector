@@ -79,6 +79,22 @@ void rxtxbuffer_sent_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size)
 	}
 }
 
+void rxtxbuffer_clear(rxtxbuffer_t* pt) {
+	pt->data_size = 0;
+	pt->sent_size = 0;
+}
+
+void rxtxbuffer_reset_sent_size(rxtxbuffer_t* pt) {
+	pt->sent_size = 0;
+}
+
+size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, void* data, size_t data_size) {
+	size_t chunk_size = MIN(rxtxbuffer_free_space(pt), data_size);
+	memcpy(rxtxbuffer_free_space_ptr(pt), data, chunk_size);
+	rxtxbuffer_data_increase_size(pt, chunk_size);
+	return chunk_size;
+}
+
 void* rxtxbuffer_data_ptr(rxtxbuffer_t* pt) {
 	return ((char*)(pt->buffer)) + pt->sent_size;
 }
