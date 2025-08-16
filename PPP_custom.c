@@ -197,17 +197,11 @@ uint8_t ppp_stream_init(
         return PPP_ERR_INVALID_PARAMETERS;
     }
 
-    //stream->rx_buffer = rx_buffer;
-    //stream->tx_buffer = tx_buffer;
-
     rxtxbuffer_init(&stream->rx_buffer, rx_buffer, buffer_capacity);
     rxtxbuffer_init(&stream->tx_buffer, tx_buffer, buffer_capacity);
 
     stream->buffer_capacity = buffer_capacity;
     stream->MTU_size = mtu;
-
-    //stream->rx_frame_received_size = 0;
-    //stream->tx_frame_sent_size = 0;
 
     stream->rx_state = PPP_RX_FRAME_PARSING_STATE_WAIT_FOR_START_FLAG;
     stream->tx_state = PPP_RX_FRAME_PARSING_STATE_WAIT_FOR_START_FLAG;
@@ -294,12 +288,13 @@ int8_t ppp_stream_send_routine(ppp_stream_t* stream, ppp_send_buffer_fcn_t send_
 
     if (stream->tx_state == PPP_TX_FRAME_PARSING_STATE_SENDING) {
         
-        sent_now = send_fcn(rxtxbuffer_data_ptr(&stream->tx_buffer), stream->tx_message.frame_size - rxtxbuffer_sent_size(&stream->tx_buffer), context);
+        sent_now = send_fcn(rxtxbuffer_data_ptr(&stream->tx_buffer), rxtxbuffer_data_remaining(&stream->tx_buffer), context);
         if (sent_now < 0) {
             return PPP_ERR_SENDING_OPERATION_ERROR;
         }
 		rxtxbuffer_sent_data_increase_size(&stream->tx_buffer, sent_now);
-        if (rxtxbuffer_sent_size(&stream->tx_buffer) >= stream->tx_message.frame_size) {
+		
+        if (rxtxbuffer_data_remaining(&stream->tx_buffer) <= 0) {
             stream->tx_state = PPP_TX_FRAME_PARSING_STATE_SENDING_COMPLETED;
 			ppp_on_tx_frame(stream, &(stream->tx_message));
         }
@@ -322,9 +317,8 @@ int8_t ppp_stream_send_frame(ppp_stream_t* stream, const ppp_decoded_frame_t mes
     else {
         size_t enc_len;
 		rxtxbuffer_clear(&stream->tx_buffer);
-        int8_t result = ppp_encode(message.payload, message.payload_size, rxtxbuffer_buffer(&stream->tx_buffer), stream->buffer_capacity, &enc_len, message.address, message.control, message.protocol);
+        int8_t result = ppp_encode(message.payload, message.payload_size, rxtxbuffer_buffer(&stream->tx_buffer), rxtxbuffer_capacity(&stream->tx_buffer), &enc_len, message.address, message.control, message.protocol);
 		
-
 		if (result == PPP_SUCCESS) {
             rxtxbuffer_data_increase_size(&stream->tx_buffer, enc_len);
             ppp_encoded_frame_t encoded_message;
@@ -403,7 +397,6 @@ static void tcp_ppp_rx_callback(
     ppp_decoded_packet_t pkt;
 
     if (message->payload_size < TCP_HEADER_SIZE) return; // malformed
-
     context->last_recv_packet_timestamp_ms = stream->get_system_millis ? stream->get_system_millis() : 0;
 
 	pkt.packet = message->payload;
@@ -486,15 +479,12 @@ static int tcp_try_send_next(tcp_t* ctx)
 			
             )
         {
-   //         size_t a = tcp_time_since_ms(ctx, ctx->last_sent_packet_timestamp_ms);
-
-   //         int ggg = 2;
-			//printf("%lld >= %d -> %d\n", a, ctx->keep_alive_interval_ms, a >= ctx->keep_alive_interval_ms);
+            // continues te flow and doesent return
         }
         else if (ctx->keep_alive_interval_ms > 0 &&
             tcp_time_since_ms(ctx, ctx->last_sent_packet_timestamp_ms) >= ctx->keep_alive_interval_ms)
         {
-
+            // continues te flow and doesent return
         }
         else {
             return 0;
@@ -830,7 +820,7 @@ static int wire_send_fn(void* buffer, int buffer_size, void* ctx) {
 
     if (inserted_error <= 0 && buffer_size > 1) {
         ((uint8_t*)buffer)[1] += 1;
-        inserted_error = 1; // for debugging, to see if we can handle errors
+        inserted_error++; // for debugging, to see if we can handle errors
     }
 
     int pushed = ring_buffer_enqueue_arr(end->tx_to_peer, (const uint8_t*)buffer, (size_t)buffer_size);
@@ -862,7 +852,7 @@ static size_t get_ms(void) {
 
 /* ==== demo ==== */
 #define BUF_SIZE 512
-#define MTU_SIZE 2
+#define MTU_SIZE 1
 #define KEEP_ALIVE_INTERVAL_MS 1000
 int tcp_test_1(void) {
     /* Two wire directions */

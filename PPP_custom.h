@@ -192,11 +192,6 @@ typedef struct ppp_stream {
 
 
 
-
-
-
-
-
 uint8_t ppp_stream_init(
 	ppp_stream_t* stream,
 	uint8_t* rx_buffer,

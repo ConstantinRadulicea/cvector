@@ -145,6 +145,7 @@ void rxtxbuffer_clear(rxtxbuffer_t* pt);
  */
 void rxtxbuffer_reset_sent_size(rxtxbuffer_t* pt);
 
+
 size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, void* data, size_t data_size);
 
 /**
