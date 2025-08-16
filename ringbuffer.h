@@ -9,13 +9,16 @@ extern "C" {
 #endif
 
     // Return codes
-#define RING_BUFFER_SUCCESS               0
+#define RING_BUFFER_TRUE                      1
+#define RING_BUFFER_FALSE                     0
+
+#define RING_BUFFER_SUCCESS                   0
 #define RING_BUFFER_ERROR_INVALID_PARAMETERS  1
 #define RING_BUFFER_ERROR_BUFFER_IS_FULL      2
 #define RING_BUFFER_ERROR_BUFFER_IS_EMPTY     3
 
 // Ring buffer structure
-    typedef struct {
+    typedef struct ring_buffer {
         uint8_t* buffer;
         size_t size;  // total size of buffer
         volatile size_t head;  // write position
@@ -29,7 +32,7 @@ extern "C" {
      * @param size Size of the buffer (must be ≥ 2)
      * @return RING_BUFFER_SUCCESS or RING_BUFFER_ERROR_INVALID_PARAMETERS
      */
-    int ring_buffer_init(ring_buffer_t* rb, uint8_t* buffer, size_t size);
+    uint8_t ring_buffer_init(ring_buffer_t* rb, uint8_t* buffer, size_t size);
 
     /**
      * @brief Returns total usable capacity (size - 1)
@@ -59,17 +62,17 @@ extern "C" {
     /**
      * @brief Enqueue a byte into the buffer
      */
-    int ring_buffer_enqueue(ring_buffer_t* rb, uint8_t byte);
+    uint8_t ring_buffer_enqueue(ring_buffer_t* rb, uint8_t byte);
 
     /**
      * @brief Dequeue a byte from the buffer
      */
-    int ring_buffer_dequeue(ring_buffer_t* rb, uint8_t* out_byte);
+    uint8_t ring_buffer_dequeue(ring_buffer_t* rb, uint8_t* out_byte);
 
     /**
      * @brief Peek the next byte without removing it
      */
-    int ring_buffer_peek(ring_buffer_t* rb, uint8_t* out_byte);
+    uint8_t ring_buffer_peek(ring_buffer_t* rb, uint8_t* out_byte);
 
     /**
      * @brief Enqueue a byte array into the buffer
@@ -112,12 +115,12 @@ extern "C" {
     /**
      * @brief Check if buffer is empty
      */
-    int ring_buffer_is_empty(ring_buffer_t* rb);
+    uint8_t ring_buffer_is_empty(ring_buffer_t* rb);
 
     /**
      * @brief Check if buffer is full
      */
-    int ring_buffer_is_full(ring_buffer_t* rb);
+    uint8_t ring_buffer_is_full(ring_buffer_t* rb);
 
 
     /**
