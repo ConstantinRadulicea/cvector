@@ -6,7 +6,7 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 // Utility function to initialize the rxtxbuffer_t
-int rxtxbuffer_init(rxtxbuffer_t* _Cvector, void* buf, size_t _capacity) {
+uint8_t rxtxbuffer_init(rxtxbuffer_t* _Cvector, uint8_t* buf, size_t _capacity) {
 	if (_Cvector == NULL) {
 		return RXTXBUFFER_ERROR_INVALID_PARAMETERS;
 	}
@@ -17,14 +17,14 @@ int rxtxbuffer_init(rxtxbuffer_t* _Cvector, void* buf, size_t _capacity) {
 
 
 	_Cvector->buffer = buf;
-	_Cvector->data_size = 0;
-	_Cvector->sent_size = 0;
+	_Cvector->data_size = (size_t)0;
+	_Cvector->sent_size = (size_t)0;
 	_Cvector->capacity = _capacity;
 
 	return RXTXBUFFER_SUCCESS;
 }
 
-void* rxtxbuffer_buffer(rxtxbuffer_t* pt) {
+uint8_t* rxtxbuffer_buffer_ptr(rxtxbuffer_t* pt) {
 	return pt->buffer;
 }
 
@@ -58,8 +58,8 @@ void rxtxbuffer_data_increase_size(rxtxbuffer_t* pt, size_t recved_data_size) {
 
 void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size) {
 	if (decreased_size >= pt->data_size) {
-		pt->data_size = 0;
-		pt->sent_size = 0;
+		pt->data_size = (size_t)0;
+		pt->sent_size = (size_t)0;
 	}
 	else
 	{
@@ -72,7 +72,7 @@ void rxtxbuffer_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size) {
 
 void rxtxbuffer_sent_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size) {
 	if (decreased_size >= pt->data_size) {
-		pt->sent_size = 0;
+		pt->sent_size = (size_t)0;
 	}
 	else {
 		pt->sent_size -= decreased_size;
@@ -80,31 +80,31 @@ void rxtxbuffer_sent_data_decrease_size(rxtxbuffer_t* pt, size_t decreased_size)
 }
 
 void rxtxbuffer_clear(rxtxbuffer_t* pt) {
-	pt->data_size = 0;
-	pt->sent_size = 0;
+	pt->data_size = (size_t)0;
+	pt->sent_size = (size_t)0;
 }
 
 void rxtxbuffer_reset_sent_size(rxtxbuffer_t* pt) {
-	pt->sent_size = 0;
+	pt->sent_size = (size_t)0;
 }
 
-size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, void* data, size_t data_size) {
+size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, uint8_t* data, size_t data_size) {
 	size_t chunk_size = MIN(rxtxbuffer_free_space(pt), data_size);
 	memcpy(rxtxbuffer_free_space_ptr(pt), data, chunk_size);
 	rxtxbuffer_data_increase_size(pt, chunk_size);
 	return chunk_size;
 }
 
-void* rxtxbuffer_data_ptr(rxtxbuffer_t* pt) {
-	return ((char*)(pt->buffer)) + pt->sent_size;
+uint8_t* rxtxbuffer_data_ptr(rxtxbuffer_t* pt) {
+	return ((uint8_t*)(pt->buffer)) + pt->sent_size;
 }
 
-void* rxtxbuffer_free_space_ptr(rxtxbuffer_t* pt) {
-	return ((char*)(pt->buffer)) + pt->data_size;
+uint8_t* rxtxbuffer_free_space_ptr(rxtxbuffer_t* pt) {
+	return ((uint8_t*)(pt->buffer)) + pt->data_size;
 }
 
 void rxtxbuffer_shift_data_buf(rxtxbuffer_t* pt) {
-	memmove(rxtxbuffer_buffer(pt), rxtxbuffer_data_ptr(pt), rxtxbuffer_data_remaining(pt));
+	memmove(rxtxbuffer_buffer_ptr(pt), rxtxbuffer_data_ptr(pt), rxtxbuffer_data_remaining(pt));
 	pt->data_size = rxtxbuffer_data_remaining(pt);
 	pt->sent_size = (size_t)0;
 }

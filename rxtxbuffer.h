@@ -30,6 +30,7 @@
 
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,10 +44,10 @@ extern "C" {
 #define RXTXBUFFER_CAST(ptr, type) ((type)(ptr))
 
 typedef struct rxtxbuffer {
-    void*  buffer;      // Pointer to raw memory buffer
+    uint8_t*  buffer;      // Pointer to raw memory buffer
     size_t capacity;    // Maximum size of buffer in bytes
-    size_t sent_size;   // Amount of data already consumed/transmitted
-    size_t data_size;   // Amount of valid data currently stored
+    volatile size_t sent_size;   // Amount of data already consumed/transmitted
+    volatile size_t data_size;   // Amount of valid data currently stored
 } rxtxbuffer_t;
 
 
@@ -55,7 +56,7 @@ typedef struct rxtxbuffer {
  * @param pt Pointer to RX/TX buffer struct
  * @return Pointer to underlying memory buffer
  */
-void* rxtxbuffer_buffer(rxtxbuffer_t* pt);
+uint8_t* rxtxbuffer_buffer_ptr(rxtxbuffer_t* pt);
 
 /**
  * @brief Get number of bytes already consumed/transmitted.
@@ -85,7 +86,7 @@ size_t rxtxbuffer_capacity(rxtxbuffer_t* pt);
  * @param _capacity Size of the memory block in bytes
  * @return 0 on success
  */
-int rxtxbuffer_init(rxtxbuffer_t* _Cvector, void* buf, size_t _capacity);
+uint8_t rxtxbuffer_init(rxtxbuffer_t* _Cvector, uint8_t* buf, size_t _capacity);
 
 /**
  * @brief Get total free space available in the buffer (for new data).
@@ -146,21 +147,21 @@ void rxtxbuffer_clear(rxtxbuffer_t* pt);
 void rxtxbuffer_reset_sent_size(rxtxbuffer_t* pt);
 
 
-size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, void* data, size_t data_size);
+size_t rxtxbuffer_push_arr(rxtxbuffer_t* pt, uint8_t* data, size_t data_size);
 
 /**
  * @brief Get pointer to the valid data region in the buffer.
  * @param pt Pointer to RX/TX buffer struct
  * @return Pointer to start of valid data
  */
-void* rxtxbuffer_data_ptr(rxtxbuffer_t* pt);
+uint8_t* rxtxbuffer_data_ptr(rxtxbuffer_t* pt);
 
 /**
  * @brief Get pointer to the free space region in the buffer (where new data can be written).
  * @param pt Pointer to RX/TX buffer struct
  * @return Pointer to first free byte
  */
-void* rxtxbuffer_free_space_ptr(rxtxbuffer_t* pt);
+uint8_t* rxtxbuffer_free_space_ptr(rxtxbuffer_t* pt);
 
 /**
  * @brief Shift valid data in the buffer to the beginning, removing consumed bytes.
