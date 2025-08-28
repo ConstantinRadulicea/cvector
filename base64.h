@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // returns the size of the encoded buffer
 size_t Base64encode_len(size_t _NunOfBytesToEncode);
 
@@ -43,5 +47,9 @@ size_t Base64decode(char* _Decoded, const char* _ToDecode, size_t _NunOfBytesToD
 *   Returns the size of _Encoded
 */
 size_t Base64encode_BigEndian(char* _Encoded, const void* _ToEncode, size_t _NunOfBytesToEncode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __BASE64_H__

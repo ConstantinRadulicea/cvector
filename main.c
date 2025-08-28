@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-
 #include "PPP_custom.h"
+#include "flight_control_loop.h"
 
 
 #define MB 1048576      // 1 megabyte in bytes = 2^20
@@ -394,7 +394,8 @@ int main() {
     //ppp_test_encode_decode();
     //ppp_stream_test();
     //ppp_custom_test_receive();
-	tcp_test_1();
+	//tcp_test_1();
+    flight_control_loop_test();
     //ring_buffer_test_peek_offset();
     return 0;
 }

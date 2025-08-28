@@ -7,6 +7,13 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct d_linked_list;
+struct s_linked_list;
+
 /**************************************************************************************************************/
 // Double linked list
 typedef struct d_linked_list
@@ -565,5 +572,8 @@ static s_ll* s_ll_find_s(s_ll* _front, s_ll* _back, s_ll* _match, int(*compar)(v
 	}
 	return NULL;
 }
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !__LINKED_LIST_H__

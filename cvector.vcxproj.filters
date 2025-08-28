@@ -45,6 +45,36 @@
     <ClInclude Include="PPP_custom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="crc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="attitude_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="madgwick_filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="motor_mixer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="flight_control_loop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rate_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -75,6 +105,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PPP_custom.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="crc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filters.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="attitude_controller.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="madgwick_filter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="motor_mixer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="flight_control_loop.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rate_controller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

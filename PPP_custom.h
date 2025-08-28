@@ -148,7 +148,7 @@ typedef enum {
 	PPP_TX_FRAME_PARSING_STATE_SENDING_COMPLETED,
 	PPP_TX_FRAME_PARSING_STATE_SENDING,
 	PPP_TX_FRAME_PARSING_STATE_ERROR
-} ppp_tx_frame_parsing_state_t;
+} ppp_tx_frame_state_t;
 
 typedef enum {
 	PPP_STREAM_STATUS_OK = 0,
@@ -173,7 +173,7 @@ typedef struct ppp_stream {
 	ppp_decoded_frame_t rx_message;
 	ppp_encoded_frame_t tx_message;
 	ppp_rx_frame_parsing_state_t rx_state;
-	ppp_tx_frame_parsing_state_t tx_state;
+	ppp_tx_frame_state_t tx_state;
 	ppp_frame_rx_callback_t packet_rx_callback;
 	ppp_frame_tx_callback_t packet_tx_callback;
 	ppp_get_system_millis get_system_millis;

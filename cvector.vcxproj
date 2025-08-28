@@ -129,24 +129,43 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="base64.h" />
+    <ClInclude Include="crc.h" />
     <ClInclude Include="cstring.h" />
     <ClInclude Include="cvector.h" />
     <ClInclude Include="binarysearchtree.h" />
+    <ClInclude Include="filters.h" />
+    <ClInclude Include="attitude_controller.h" />
+    <ClInclude Include="flight_control_loop.h" />
+    <ClInclude Include="geometry3D.h" />
+    <ClInclude Include="imu.h" />
     <ClInclude Include="linked_list.h" />
+    <ClInclude Include="madgwick_filter.h" />
     <ClInclude Include="memswap.h" />
+    <ClInclude Include="motor_mixer.h" />
+    <ClInclude Include="pid.h" />
     <ClInclude Include="PPP_custom.h" />
+    <ClInclude Include="rate_controller.h" />
     <ClInclude Include="ringbuffer.h" />
     <ClInclude Include="rxtxbuffer.h" />
     <ClInclude Include="staticcvector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base64.c" />
+    <ClCompile Include="crc.c" />
     <ClCompile Include="cstring.c" />
     <ClCompile Include="cvector.c" />
     <ClCompile Include="binarysearchtree.c" />
+    <ClCompile Include="filters.c" />
+    <ClCompile Include="attitude_controller.c" />
+    <ClCompile Include="flight_control_loop.c" />
+    <ClCompile Include="imu.c" />
+    <ClCompile Include="madgwick_filter.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memswap.c" />
+    <ClCompile Include="motor_mixer.c" />
+    <ClCompile Include="pid.c" />
     <ClCompile Include="PPP_custom.c" />
+    <ClCompile Include="rate_controller.c" />
     <ClCompile Include="ringbuffer.c" />
     <ClCompile Include="rxtxbuffer.c" />
     <ClCompile Include="staticcvector.c" />

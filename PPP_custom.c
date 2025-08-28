@@ -3,26 +3,11 @@
 #include <string.h>
 #include "PPP_custom.h"
 
+#include "crc.h"
+
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
-
-// Polynomial: 0x1021, Init: 0xFFFF, No reflection, No final XOR
-uint16_t crc16_ccitt_continue(uint16_t crc, const uint8_t* data, size_t len) {
-    for (size_t i = 0; i < len; i++) {
-        crc ^= (uint16_t)data[i] << 8;
-        for (int j = 0; j < 8; j++) {
-            crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : (crc << 1);
-        }
-    }
-    return crc;
-}
-
-// Computes CRC-16-CCITT (poly 0x1021, init 0xFFFF)
-uint16_t ppp_crc16_ccitt_start(const uint8_t* data, size_t len) {
-    uint16_t crc = 0xFFFF;
-    return crc16_ccitt_continue(crc, data, len);
-}
 
 // Escapes a byte and writes to output buffer
 void ppp_write_escaped(uint8_t byte, uint8_t* out_buf, size_t* out_len) {
@@ -83,8 +68,9 @@ int8_t ppp_encode(
     header[2] = (protocol >> 8) & 0xFF;
     header[3] = (protocol) & 0xFF;
 
-    uint16_t fcs = ppp_crc16_ccitt_start(header, sizeof(header));
-    fcs = crc16_ccitt_continue(fcs, payload, payload_len);
+	uint16_t fcs = crc16_ccitt_init();
+    fcs = crc16_ccitt_update(fcs, header, sizeof(header));
+    fcs = crc16_ccitt_update(fcs, payload, payload_len);
 
     out_buf[out_len] = PPP_FLAG;
     out_len++;
@@ -131,7 +117,10 @@ int8_t ppp_decode(uint8_t *frame, size_t frame_len, uint8_t *decoded_buffer, ppp
     if (temp_len < (PPP_PROTOCOL_OVERHEAD_BYTE_SIZE - (2 * PPP_START_FLAG_SIZE))) return PPP_ERR_FRAME_TOO_SMALL;
     
     uint16_t recv_crc = ((uint16_t)temp[temp_len - 2] << 8) | temp[temp_len-1];
-    uint16_t calc_crc = ppp_crc16_ccitt_start(temp, temp_len - PPP_CRC_BYTE_SIZE);
+    
+    uint16_t calc_crc = crc16_ccitt_init();
+    calc_crc = crc16_ccitt_update(calc_crc, temp, temp_len - PPP_CRC_BYTE_SIZE);
+
     if (recv_crc != calc_crc) return PPP_ERR_INVALID_CRC;
 
     message->address = temp[0];
@@ -347,14 +336,14 @@ void ppp_stream_drop_send_frame(ppp_stream_t* stream) {
 
 void ppp_stream_tick(ppp_stream_t* stream) {
     int result = ppp_stream_send_routine(stream, stream->send_buffer_fcn, stream->send_buffer_fcn_context);
-    if (result != PPP_SUCCESS) {
-        printf("Error: ppp_stream_send_routine {%d}\n", result);
-        stream->stream_status = PPP_STREAM_STATUS_CONNECTION_ERROR;
-        if (stream->stream_status_callback) {
-            stream->stream_status_callback(stream, stream->stream_status, stream->stream_status_callback_context);
-        }
-        //return;
-    }
+    //if (result != PPP_SUCCESS) {
+    //    printf("Error: ppp_stream_send_routine {%d}\n", result);
+    //    stream->stream_status = PPP_STREAM_STATUS_CONNECTION_ERROR;
+    //    if (stream->stream_status_callback) {
+    //        stream->stream_status_callback(stream, stream->stream_status, stream->stream_status_callback_context);
+    //    }
+    //    //return;
+    //}
 
     // recv routine
     uint8_t byte;
@@ -363,14 +352,14 @@ void ppp_stream_tick(ppp_stream_t* stream) {
         result = stream->recv_buffer_fcn(&byte, 1, stream->recv_buffer_fcn_context);
 		ppp_stream_parse_byte(stream, byte);
     } while (result > 0);
-    if (result < 0) {
-        printf("Error: ppp_stream_recv_routine {%d}\n", result);
-        stream->stream_status = PPP_STREAM_STATUS_CONNECTION_ERROR;
-        if (stream->stream_status_callback) {
-            stream->stream_status_callback(stream, stream->stream_status, stream->stream_status_callback_context);
-        }
-        //return;
-    }
+    //if (result < 0) {
+    //    printf("Error: ppp_stream_recv_routine {%d}\n", result);
+    //    stream->stream_status = PPP_STREAM_STATUS_CONNECTION_ERROR;
+    //    if (stream->stream_status_callback) {
+    //        stream->stream_status_callback(stream, stream->stream_status, stream->stream_status_callback_context);
+    //    }
+    //    //return;
+    //}
     // add echo reply commands
 }
 
@@ -394,6 +383,9 @@ static void tcp_ppp_rx_callback(
     ppp_decoded_packet_t pkt;
 
     if (message->payload_size < TCP_HEADER_SIZE) return; // malformed
+    if (message->protocol != TCP_PPP_PROTOCOL) {
+        return;
+    }
     context->last_recv_packet_timestamp_ms = stream->get_system_millis ? stream->get_system_millis() : 0;
 
 	pkt.packet = message->payload;
@@ -815,10 +807,18 @@ static int wire_send_fn(void* buffer, int buffer_size, void* ctx) {
     link_end_t* end = (link_end_t*)ctx;
     if (!end || buffer_size <= 0) return -1;
 
-    if (inserted_error <= 0 && buffer_size > 1) {
-        ((uint8_t*)buffer)[1] += 1;
-        inserted_error++; // for debugging, to see if we can handle errors
+
+    if (((inserted_error % 6) == 0) && buffer_size > 0) {
+        ((uint8_t*)buffer)[buffer_size-1] += 1;
     }
+    else if (((inserted_error % 4) == 0) && buffer_size > 0) {
+        ((uint8_t*)buffer)[0] += 1;
+    }
+    else if (((inserted_error % 2) == 0) && buffer_size > 0) {
+        ((uint8_t*)buffer)[buffer_size/2] += 1;
+    }
+
+    inserted_error++; // for debugging, to see if we can handle errors
 
     int pushed = ring_buffer_enqueue_arr(end->tx_to_peer, (const uint8_t*)buffer, (size_t)buffer_size);
 
@@ -892,7 +892,7 @@ int tcp_test_1(void) {
         get_ms);
 
     /* Send a message from A to B */
-    const char* msg = "Hello from A -> B!";
+    const char msg[] = "Hello from A -> B!aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     int queued = tcp_send(&A, (uint8_t*)msg, (int)strlen(msg));
     printf("A queued %d bytes\n", queued);
 
