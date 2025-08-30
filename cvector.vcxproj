@@ -145,6 +145,7 @@
     <ClInclude Include="pid.h" />
     <ClInclude Include="PPP_custom.h" />
     <ClInclude Include="rate_controller.h" />
+    <ClInclude Include="rc_control.h" />
     <ClInclude Include="ringbuffer.h" />
     <ClInclude Include="rxtxbuffer.h" />
     <ClInclude Include="staticcvector.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="pid.c" />
     <ClCompile Include="PPP_custom.c" />
     <ClCompile Include="rate_controller.c" />
+    <ClCompile Include="rc_control.c" />
     <ClCompile Include="ringbuffer.c" />
     <ClCompile Include="rxtxbuffer.c" />
     <ClCompile Include="staticcvector.c" />

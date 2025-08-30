@@ -6,6 +6,8 @@
 #include "rate_controller.h"
 #include "motor_mixer.h"
 
+#include "rc_control.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,6 +16,7 @@ typedef struct flight_control_loop_s{
 	imu_t imu;
 	rate_controller_t rate_controller;
 	attitude_controller_t attitude_controller;
+	rc_attitude_control_t rc_attitude_control;
 	float motor_throttle[NUM_MOTORS];
 	uint16_t motor_raw_command[NUM_MOTORS];
 } flight_control_loop_t;

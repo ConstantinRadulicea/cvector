@@ -8,13 +8,6 @@
 #define PID_LIMIT CONTROLLER_PID_MAX_OUTPUT                 // Axis PID clamp
 #define AXIS_TO_MOTOR_GAIN (0.5f / PID_LIMIT)  // ±500 → ±0.5 motor range
 
-void motor_mixer_mix(float throttle, float roll, float pitch, float yaw, float out[NUM_MOTORS]) {
-    // Motor order: 0 = FL, 1 = FR, 2 = RL, 3 = RR
-    out[0] = throttle + pitch + roll - yaw; // Front Left  (CCW)
-    out[1] = throttle + pitch - roll + yaw; // Front Right (CW)
-    out[2] = throttle - pitch + roll + yaw; // Rear Left   (CW)
-    out[3] = throttle - pitch - roll - yaw; // Rear Right  (CCW)
-}
 
 static const float MIX[4][3] = {
     // roll   pitch   yaw
@@ -34,6 +27,7 @@ void motor_mixer_quad_x(
 	// Clamp inputs
 	throttle_norm = CLAMP(throttle_norm, 0.0f, 1.0f);
 	throttle_idle = CLAMP(throttle_idle, 0.0f, 1.0f);
+
     // Scale PID outputs into motor fraction
     float r = roll_out * AXIS_TO_MOTOR_GAIN;
     float p = pitch_out * AXIS_TO_MOTOR_GAIN;
@@ -43,6 +37,7 @@ void motor_mixer_quad_x(
     float m[4];
 
 
+	// Add throttle + roll + pitch + yaw for each motor
     for (int i = 0; i < 4; i++) {
         m[i] = throttle_norm + MIX[i][0] * r + MIX[i][1] * p + MIX[i][2] * y;
     }
@@ -54,15 +49,19 @@ void motor_mixer_quad_x(
         if (m[i] > mmax) mmax = m[i];
     }
 
+	// If any motor is above 1.0, lower all motors by the excess
     if (mmax > 1.0f) {
         float shift = mmax - 1.0f;
         for (int i = 0; i < 4; i++) m[i] -= shift;
     }
+
+	// If any motor is below 0.0, raise all motors by the deficit
     if (mmin < 0.0f) {
         float shift = 0.0f - mmin;
         for (int i = 0; i < 4; i++) m[i] += shift;
     }
 
+	// Step 3: Clamp to [throttle_idle..1.0] and write output
     for (int i = 0; i < 4; i++) {
         m[i] = CLAMP(m[i], throttle_idle, 1.0f);
         motor_dshot[i] = m[i];

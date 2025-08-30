@@ -75,23 +75,23 @@ void madgwick_filter_apply(madgwick_filter_t *filter, float ax, float ay, float 
     //Compute the objective function for gravity, equation(15), simplified to equation (25) due to the 0's in the acceleration reference quaternion
     F_g[0] = 2*(q_est_prev.x * q_est_prev.z - q_est_prev.w * q_est_prev.y) - q_a.x;
     F_g[1] = 2*(q_est_prev.w * q_est_prev.x + q_est_prev.y* q_est_prev.z) - q_a.y;
-    F_g[2] = 2*(0.5 - q_est_prev.x * q_est_prev.x - q_est_prev.y * q_est_prev.y) - q_a.z;
+    F_g[2] = 2*(0.5f - q_est_prev.x * q_est_prev.x - q_est_prev.y * q_est_prev.y) - q_a.z;
 
     //Compute the Jacobian matrix, equation (26), for gravity
-    J_g[0][0] = -2 * q_est_prev.y;
-    J_g[0][1] =  2 * q_est_prev.z;
-    J_g[0][2] = -2 * q_est_prev.w;
-    J_g[0][3] =  2 * q_est_prev.x;
+    J_g[0][0] = -2.0f * q_est_prev.y;
+    J_g[0][1] =  2.0f * q_est_prev.z;
+    J_g[0][2] = -2.0f * q_est_prev.w;
+    J_g[0][3] =  2.0f * q_est_prev.x;
 
-    J_g[1][0] = 2 * q_est_prev.x;
-    J_g[1][1] = 2 * q_est_prev.w;
-    J_g[1][2] = 2 * q_est_prev.z;
-    J_g[1][3] = 2 * q_est_prev.y;
+    J_g[1][0] = 2.0f * q_est_prev.x;
+    J_g[1][1] = 2.0f * q_est_prev.w;
+    J_g[1][2] = 2.0f * q_est_prev.z;
+    J_g[1][3] = 2.0f * q_est_prev.y;
 
-    J_g[2][0] = 0;
-    J_g[2][1] = -4 * q_est_prev.x;
-    J_g[2][2] = -4 * q_est_prev.y;
-    J_g[2][3] = 0;
+    J_g[2][0] = 0.0f;
+    J_g[2][1] = -4.0f * q_est_prev.x;
+    J_g[2][2] = -4.0f * q_est_prev.y;
+    J_g[2][3] = 0.0f;
 
     // now computer the gradient, equation (20), gradient = J_g'*F_g
     gradient.w = J_g[0][0] * F_g[0] + J_g[1][0] * F_g[1] + J_g[2][0] * F_g[2];

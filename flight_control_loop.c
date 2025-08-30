@@ -3,6 +3,7 @@
 #include "geometry2D.h"
 #include "string.h"
 #include <stdio.h>
+#include <time.h>
 
 #define FLIGHT_CONTROLLER_PID_FREQ_HZ 1000
 
@@ -31,6 +32,10 @@
 #define RATE_GAIN (radians(1.0f) * 50.0f)
 #define MAX_ANGLE radians(50.0f)
 #define MAX_RATE radians(600.0f)
+
+#define RC_INPUT_SAMPLE_RATE_HZ FLIGHT_CONTROLLER_PID_FREQ_HZ
+#define RC_INPUT_FILTER_CUTOFF_FREQUENCY_HZ 40
+#define RC_INPUT_DEADBAND 0.05f
 
 
 
@@ -68,16 +73,16 @@ coord3D get_gyro_data() {
 	// Placeholder function to simulate gyro data retrieval
 	return (coord3D) {
 		frand_range(-1.0f, 1.0f),
-			frand_range(-1.0f, 1.0f),
-			frand_range(-1.0f, 1.0f)
+		frand_range(-1.0f, 1.0f),
+		frand_range(-1.0f, 1.0f)
 	};
 }
 coord3D get_accel_data() {
 	// Placeholder function to simulate acc data retrieval
 	return (coord3D) {
 		frand_range(-10.0f, 10.0f),
-			frand_range(-10.0f, 10.0f),
-			frand_range(-10.0f, 10.0f)
+		frand_range(-10.0f, 10.0f),
+		frand_range(-10.0f, 10.0f)
 	};
 }
 
@@ -88,7 +93,7 @@ coord3D get_target_attitude() {
 
 float get_target_throttle() {
 	// Placeholder function to simulate target throttle retrieval
-	return 0.0f;
+	return 0.5f;
 }
 
 void write_motor_commands(uint16_t motor_commands[NUM_MOTORS]) {
@@ -189,6 +194,36 @@ void flight_control_loop_init(flight_control_loop_t *fcl) {
 		CONTROLLER_YAW_MAX_INTEGRAL_LIMIT,
 		CONTROLLER_YAW_PID_KFF
 	);
+
+	rc_attitude_control_init_roll(
+		&fcl->rc_attitude_control,
+		1,
+		RC_INPUT_FILTER_CUTOFF_FREQUENCY_HZ,
+		RC_INPUT_DEADBAND,
+		MAX_ANGLE,
+		0.0f,
+		RC_INPUT_SAMPLE_RATE_HZ
+	);
+
+	rc_attitude_control_init_pitch(
+		&fcl->rc_attitude_control,
+		1,
+		RC_INPUT_FILTER_CUTOFF_FREQUENCY_HZ,
+		RC_INPUT_DEADBAND,
+		MAX_ANGLE,
+		0.0f,
+		RC_INPUT_SAMPLE_RATE_HZ
+	);
+
+	rc_attitude_control_init_yaw(
+		&fcl->rc_attitude_control,
+		1,
+		RC_INPUT_FILTER_CUTOFF_FREQUENCY_HZ,
+		RC_INPUT_DEADBAND,
+		MAX_RATE,
+		0.0f,
+		RC_INPUT_SAMPLE_RATE_HZ
+	);
 }
 
 
@@ -198,13 +233,35 @@ void flight_control_loop_tick(flight_control_loop_t* fcl) {
 	coord3D accel_data = get_accel_data();
 	imu_update(&fcl->imu, accel_data, gyro_data);
 
+	// RC input
+	coord3D target_attitude = get_target_attitude();
+	float target_throttle = get_target_throttle();
+	
+	rc_attitude_control_update(
+		&fcl->rc_attitude_control,
+		target_attitude.x,
+		target_attitude.y,
+		target_attitude.z,
+		target_throttle
+	);
+	rc_attitude_control_get_processed(
+		&fcl->rc_attitude_control,
+		&(target_attitude.x),
+		&(target_attitude.y),
+		&(target_attitude.z),
+		&target_throttle
+	);
+
+	target_throttle = validate_dshot_value(target_throttle * (float)DSHOT_MAX_THROTTLE);
+
+
+
 	// Get estimated attitude and body frame accel/gyro
 	coord3D body_frame_accel, body_frame_gyro;
 	quaternion body_frame_estimated_q;
 	imu_get_estimated_data(&fcl->imu, &body_frame_estimated_q, &body_frame_accel, &body_frame_gyro);
 
 	// Update attitude controller
-	coord3D target_attitude = get_target_attitude();
 	attitude_controller_angle_mode_update(
 		&fcl->attitude_controller,
 		body_frame_estimated_q,
@@ -241,8 +298,6 @@ void flight_control_loop_tick(flight_control_loop_t* fcl) {
 	);
 
 	// Mix PID outputs to motor commands
-	float target_throttle = get_target_throttle();
-	target_throttle = validate_dshot_value(target_throttle * (float)DSHOT_MAX_THROTTLE);
 	motor_mixer_quad_x(
 		target_throttle,
 		pid_roll_output,

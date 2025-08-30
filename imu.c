@@ -82,7 +82,9 @@ void imu_update_madgwick(imu_t* im) {
 	);
 
 	//im->estimated_q = quatmultiply(&(im->q_offset), &(im->madgwick_filter.q_est));
-	im->estimated_q = quatnormalize(&(im->estimated_q));
+	//im->estimated_q = quatnormalize(&(im->madgwick_filter.q_est));
+	im->estimated_q = im->madgwick_filter.q_est;
+	
 }
 
 void imu_update(imu_t* im, coord3D imu_raw_accel_m_s2, coord3D imu_raw_gyro_rad) {
@@ -111,8 +113,7 @@ void imu_set_accel_bias(imu_t* im, coord3D accel_bias, float accel_misalignment_
 }
 
 void imu_get_estimated_data(imu_t* im, quaternion* estimated_q, coord3D* estimated_acc, coord3D* estimated_gyro) {
-	if (estimated_q)
-	{
+	if (estimated_q) {
 		*estimated_q = im->estimated_q;
 	}
 

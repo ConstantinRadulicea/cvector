@@ -75,6 +75,9 @@
     <ClInclude Include="rate_controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="rc_control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -132,6 +135,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rate_controller.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rc_control.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
