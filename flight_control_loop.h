@@ -14,6 +14,7 @@ extern "C" {
 
 typedef struct flight_control_loop_s{
 	imu_t imu;
+	int are_esc_armed;
 	rate_controller_t rate_controller;
 	attitude_controller_t attitude_controller;
 	rc_attitude_control_t rc_attitude_control;

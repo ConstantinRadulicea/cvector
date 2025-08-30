@@ -37,6 +37,8 @@
 #define RC_INPUT_FILTER_CUTOFF_FREQUENCY_HZ 40
 #define RC_INPUT_DEADBAND 0.05f
 
+#define THROTTLE_IDLE 0.0f
+
 
 
 #define G_CONSTANT 9.80665f
@@ -88,7 +90,7 @@ coord3D get_accel_data() {
 
 coord3D get_target_attitude() {
 	// Placeholder function to simulate target attitude retrieval
-	return (coord3D) { 0.0f, 0.0f, 0.0f };
+	return (coord3D) { 1.0f, -0.5f, -1.0f };
 }
 
 float get_target_throttle() {
@@ -224,6 +226,8 @@ void flight_control_loop_init(flight_control_loop_t *fcl) {
 		0.0f,
 		RC_INPUT_SAMPLE_RATE_HZ
 	);
+
+	fcl->are_esc_armed = 1;
 }
 
 
@@ -251,10 +255,6 @@ void flight_control_loop_tick(flight_control_loop_t* fcl) {
 		&(target_attitude.z),
 		&target_throttle
 	);
-
-	target_throttle = validate_dshot_value(target_throttle * (float)DSHOT_MAX_THROTTLE);
-
-
 
 	// Get estimated attitude and body frame accel/gyro
 	coord3D body_frame_accel, body_frame_gyro;
@@ -298,14 +298,22 @@ void flight_control_loop_tick(flight_control_loop_t* fcl) {
 	);
 
 	// Mix PID outputs to motor commands
-	motor_mixer_quad_x(
-		target_throttle,
-		pid_roll_output,
-		pid_pitch_output,
-		pid_yaw_output,
-		0.0f,
-		fcl->motor_throttle
-	);
+	if (fcl->are_esc_armed != 0)
+	{
+		motor_mixer_quad_x(
+			target_throttle,
+			pid_roll_output,
+			pid_pitch_output,
+			pid_yaw_output,
+			THROTTLE_IDLE,
+			fcl->motor_throttle
+		);
+	}
+	else {
+		for (int i = 0; i < NUM_MOTORS; i++) {
+			fcl->motor_throttle[i] = 0.0f;
+		}
+	}
 
 	// Constrain motor commands and convert to raw values
 	for (int i = 0; i < NUM_MOTORS; i++) {
