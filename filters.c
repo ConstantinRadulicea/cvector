@@ -22,6 +22,10 @@ float pt1_filter_apply(pt1_filter_t* filter, float input) {
     return filter->state;
 }
 
+void pt1_filter_reset(pt1_filter_t* filter) {
+    filter->state = 0.0f;
+}
+
 void biquad_filter_init_lowpass(biquad_filter_t* f, float cutoff_freq, float sample_freq) {
     float omega = 2.0f * M_PI * cutoff_freq / sample_freq;
     float sn = sinf(omega);
@@ -55,4 +59,9 @@ float biquad_filter_apply(biquad_filter_t* f, float input) {
     f->z1 = f->b1 * input - f->a1 * output + f->z2;
     f->z2 = f->b2 * input - f->a2 * output;
     return output;
+}
+
+void biquad_filter_reset(biquad_filter_t* filter) {
+    filter->z1 = 0.0f;
+    filter->z2 = 0.0f;
 }

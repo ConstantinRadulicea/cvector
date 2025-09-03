@@ -32,6 +32,8 @@ void pt1_filter_init_lowpass(pt1_filter_t* filter, float cutoff_freq, float samp
  */
 float pt1_filter_apply(pt1_filter_t* filter, float input);
 
+void pt1_filter_reset(pt1_filter_t* filter);
+
 
 typedef struct {
 	float sample_freq;
@@ -43,6 +45,9 @@ typedef struct {
 
 void biquad_filter_init_lowpass(biquad_filter_t* f, float cutoff_freq, float sample_freq);
 float biquad_filter_apply(biquad_filter_t* f, float input);
+
+void biquad_filter_reset(biquad_filter_t* filter);
+
 
 #ifdef __cplusplus
 }

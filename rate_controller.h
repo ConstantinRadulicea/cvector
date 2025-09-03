@@ -135,4 +135,6 @@ void rate_controller_get_pid_outputs(
     float* out_pid_yaw
 );
 
+void rate_controller_reset(rate_controller_t* fc);
+
 #endif // !RATE_CONTROLLER_H

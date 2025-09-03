@@ -84,7 +84,6 @@ void imu_update_madgwick(imu_t* im) {
 	//im->estimated_q = quatmultiply(&(im->q_offset), &(im->madgwick_filter.q_est));
 	//im->estimated_q = quatnormalize(&(im->madgwick_filter.q_est));
 	im->estimated_q = im->madgwick_filter.q_est;
-	
 }
 
 void imu_update(imu_t* im, coord3D imu_raw_accel_m_s2, coord3D imu_raw_gyro_rad) {

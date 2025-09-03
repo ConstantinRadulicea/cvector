@@ -143,6 +143,24 @@ void rate_controller_update(
     fc->out_pid_yaw = yaw_out;
 }
 
+void rate_controller_reset(rate_controller_t* fc) {
+    biquad_filter_reset(&(fc->d_term_pid_roll_biquad_filter));
+    biquad_filter_reset(&(fc->d_term_pid_pitch_biquad_filter));
+    biquad_filter_reset(&(fc->d_term_pid_yaw_biquad_filter));
+
+    pt1_filter_reset(&(fc->ff_term_pid_roll_pt1_filter));
+    pt1_filter_reset(&(fc->ff_term_pid_pitch_pt1_filter));
+    pt1_filter_reset(&(fc->ff_term_pid_yaw_pt1_filter));
+
+    //fc->prev_target_roll_rate = 0.0f;
+    //fc->prev_target_pitch_rate = 0.0f;
+    //fc->prev_target_yaw_rate = 0.0f;
+
+    fc->out_pid_roll = 0.0f;
+    fc->out_pid_pitch = 0.0f;
+    fc->out_pid_yaw = 0.0f;
+}
+
 
 void rate_controller_get_pid_outputs(
     rate_controller_t* fc,

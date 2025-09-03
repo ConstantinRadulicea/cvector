@@ -6,7 +6,10 @@
 #define CLAMP(x, lo, hi) (MIN(MAX(x, lo), hi))
 
 #define PID_LIMIT CONTROLLER_PID_MAX_OUTPUT                 // Axis PID clamp
-#define AXIS_TO_MOTOR_GAIN (0.5f / PID_LIMIT)  // ±500 → ±0.5 motor range
+
+#define MAX_THROTTLE 1.0f
+#define AXIS_TO_MOTOR_GAIN ((0.5f * MAX_THROTTLE) / PID_LIMIT)  // ±500 → ±0.5 motor range
+
 
 
 static const float MIX[4][3] = {
@@ -25,8 +28,8 @@ void motor_mixer_quad_x(
     float motor_dshot[NUM_MOTORS]     // output throttle per motor
 ) {
 	// Clamp inputs
-	throttle_norm = CLAMP(throttle_norm, 0.0f, 1.0f);
-	throttle_idle = CLAMP(throttle_idle, 0.0f, 1.0f);
+	throttle_norm = CLAMP(throttle_norm, 0.0f, MAX_THROTTLE);
+	throttle_idle = CLAMP(throttle_idle, 0.0f, MAX_THROTTLE);
 
     // Scale PID outputs into motor fraction
     float r = roll_out * AXIS_TO_MOTOR_GAIN;
@@ -50,8 +53,8 @@ void motor_mixer_quad_x(
     }
 
 	// If any motor is above 1.0, lower all motors by the excess
-    if (mmax > 1.0f) {
-        float shift = mmax - 1.0f;
+    if (mmax > MAX_THROTTLE) {
+        float shift = mmax - MAX_THROTTLE;
         for (int i = 0; i < 4; i++) m[i] -= shift;
     }
 
@@ -63,7 +66,7 @@ void motor_mixer_quad_x(
 
 	// Step 3: Clamp to [throttle_idle..1.0] and write output
     for (int i = 0; i < 4; i++) {
-        m[i] = CLAMP(m[i], throttle_idle, 1.0f);
+        m[i] = CLAMP(m[i], throttle_idle, MAX_THROTTLE);
         motor_dshot[i] = m[i];
     }
 }
